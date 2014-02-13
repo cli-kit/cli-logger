@@ -7,6 +7,10 @@ var util = require('util');
 var Writable = require('stream').Writable;
 var merge = require('cli-util').merge;
 
+var RAW = 'raw';
+var STREAM = 'stream';
+var FILE = 'file';
+
 var levels = {
   trace: 10,
   debug: 20,
@@ -119,14 +123,18 @@ Logger.prototype.getLogRecord = function(level, message) {
     };
   }
   //console.log('logging message...%j', record);
-  var i, target;
+  var i, target, listeners = this.listeners('write');
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
-    if(this.conf.json) {
+    if(!listeners.length && this.conf.json && target.type !== RAW) {
       record = JSON.stringify(record);
     }
     if(level >= target.level) {
-      target.stream.write(record + '\n');
+      if(listeners.length) {
+        this.emit('write', record, target.stream);
+      }else{
+        target.stream.write(record + '\n');
+      }
     }
   }
 }
@@ -188,3 +196,9 @@ module.exports = function(conf) {
 }
 
 module.exports.Logger = Logger;
+module.exports.TRACE = levels.trace;
+module.exports.DEBUG = levels.debug;
+module.exports.INFO = levels.info;
+module.exports.WARN = levels.warn;
+module.exports.ERROR = levels.error;
+module.exports.FATAL = levels.fatal;
