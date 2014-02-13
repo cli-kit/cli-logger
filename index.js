@@ -106,10 +106,14 @@ Logger.prototype.initialize = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.getLogRecord = function(level, message) {
-  var parameters = [].slice.call(arguments, 2);
+  var parameters = [].slice.call(arguments, 2), err;
   if(parameters.length) {
     parameters.unshift(message);
     message = util.format.apply(util, parameters);
+  }
+  if((message instanceof Error)) {
+    err = message;
+    message = message.message;
   }
   var record = message;
   if(this.conf.json) {
@@ -121,6 +125,13 @@ Logger.prototype.getLogRecord = function(level, message) {
       level: level,
       time: new Date().toISOString()
     };
+    if(err) {
+      record.err = {
+        message: err.message,
+        name: err.name,
+        stack: err.stack
+      }
+    }
   }
   //console.log('logging message...%j', record);
   var i, target, listeners = this.listeners('write');

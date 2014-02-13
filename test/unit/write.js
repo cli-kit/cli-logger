@@ -17,4 +17,19 @@ describe('cli-logger:', function() {
     })
     log.info(msg);
   });
+  it('should listen for write event with error instance', function(done) {
+    var msg = 'mock write info';
+    var name = 'mock-write-logger';
+    var conf = {name: name, streams: [{path: 'log/mock-write.log'}]};
+    var log = logger(conf);
+    log.on('write', function(record, stream) {
+      expect(record.msg).to.eql(msg);
+      expect(record.err.message).to.eql(msg);
+      expect(record.err.name).to.eql('Error');
+      expect(record.err.stack).to.be.a('string');
+      //console.dir(record);
+      done();
+    })
+    log.info(new Error(msg));
+  });
 })
