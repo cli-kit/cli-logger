@@ -57,7 +57,6 @@ Logger.prototype.initialize = function() {
     stream.on('error', function(e) {
       scope.emit('error', e, stream);
     })
-    //console.log('adding stream %s', stream == process.stdout);
     streams.push({stream: stream, level: level || levels.info, name: name})
   }
   function wrap(source) {
@@ -119,7 +118,17 @@ Logger.prototype.getLogRecord = function(level, message) {
       time: new Date().toISOString()
     };
   }
-  console.log('logging message...%j', record);
+  //console.log('logging message...%j', record);
+  var i, target;
+  for(i = 0;i < this.streams.length;i++) {
+    target = this.streams[i];
+    if(this.conf.json) {
+      record = JSON.stringify(record);
+    }
+    if(level >= target.level) {
+      target.stream.write(record + '\n');
+    }
+  }
 }
 
 /**
@@ -135,6 +144,30 @@ Logger.prototype.log = function(level, message) {
   if(!message) return false;
   var record = this.getLogRecord.apply(this, arguments);
   //console.log('logging message...%s', message);
+}
+
+/**
+ *  Log a trace message.
+ *
+ *  @param message The log message.
+ *  @param ... The message replacement parameters.
+ */
+Logger.prototype.trace = function() {
+  var args = [].slice.call(arguments, 0);
+  args.unshift(levels.trace);
+  this.log.apply(this, args);
+}
+
+/**
+ *  Log a debug message.
+ *
+ *  @param message The log message.
+ *  @param ... The message replacement parameters.
+ */
+Logger.prototype.debug = function() {
+  var args = [].slice.call(arguments, 0);
+  args.unshift(levels.debug);
+  this.log.apply(this, args);
 }
 
 /**

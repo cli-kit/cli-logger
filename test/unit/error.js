@@ -40,6 +40,7 @@ describe('cli-logger:', function() {
       done();
     })
     log.streams[0].stream.end();
-    log.streams[0].stream.write('some mock data');
+    //log.streams[0].stream.write('some mock data');
+    log.info('some mock data');
   });
 })
