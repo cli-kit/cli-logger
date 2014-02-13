@@ -9,15 +9,6 @@ describe('cli-logger:', function() {
     expect(log.streams[0].stream).to.equal(process.stdout);
     done();
   });
-  it('should configure logger (invalid stream property)', function(done) {
-    var name = 'mock-stdout-logger';
-    var conf = {name: name, streams: {stream: true}};
-    function fn() {
-      var log = logger(conf);
-    }
-    expect(fn).throws(Error);
-    done();
-  });
   it('should configure logger (stderr stream)', function(done) {
     var name = 'mock-stderr-logger';
     var conf = {name: name, streams: [{stream: process.stderr}]};
@@ -30,15 +21,6 @@ describe('cli-logger:', function() {
     var conf = {name: name, streams: {stream: process.stderr}};
     var log = logger(conf);
     expect(log.streams[0].stream).to.equal(process.stderr);
-    done();
-  });
-  it('should configure logger (invalid streams)', function(done) {
-    var name = 'mock-stderr-logger';
-    var conf = {name: name, streams: true};
-    function fn() {
-      var log = logger(conf);
-    }
-    expect(fn).throws(Error);
     done();
   });
 })

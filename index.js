@@ -62,6 +62,18 @@ Logger.prototype.initialize = function() {
   }
   function wrap(source) {
     var stream = source.stream;
+    if(source.path) {
+      var opts = {
+        flags: source.flags || 'a',
+        mode: source.mode,
+        encoding: source.encoding
+      }
+      try {
+        source.stream = fs.createWriteStream(source.path, opts);
+      }catch(e) {
+        scope.emit('error', e);
+      }
+    }
     if(source.stream && !(source.stream instanceof Writable)
       && source.stream !== process.stdout
       && source.stream !== process.stderr) {
