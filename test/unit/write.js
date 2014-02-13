@@ -27,9 +27,22 @@ describe('cli-logger:', function() {
       expect(record.err.message).to.eql(msg);
       expect(record.err.name).to.eql('Error');
       expect(record.err.stack).to.be.a('string');
-      //console.dir(record);
       done();
     })
     log.info(new Error(msg));
+  });
+  it('should write error with custom message', function(done) {
+    var msg = 'mock write %s';
+    var parameters = ['info'];
+    var expected = 'mock write info';
+    var name = 'mock-write-logger';
+    var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
+    var log = logger(conf);
+    log.on('write', function(record, stream) {
+      expect(record.msg).to.eql(expected);
+      expect(record.err.message).to.eql('boom');
+      done();
+    })
+    log.info(new Error('boom'), msg, parameters[0]);
   });
 })

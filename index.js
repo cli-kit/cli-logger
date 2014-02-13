@@ -106,14 +106,19 @@ Logger.prototype.initialize = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.getLogRecord = function(level, message) {
-  var parameters = [].slice.call(arguments, 2), err;
+  var parameters = [].slice.call(arguments, 2), args;
+  var err = (message instanceof Error) ? message : null;
   if(parameters.length) {
     parameters.unshift(message);
     message = util.format.apply(util, parameters);
   }
-  if((message instanceof Error)) {
-    err = message;
-    message = message.message;
+  if(err) {
+    if(arguments.length == 2) {
+      message = err.message;
+    }else{
+      args = [].slice.call(arguments, 2);
+      message = util.format.apply(util, args);
+    }
   }
   var record = message;
   if(this.conf.json) {
