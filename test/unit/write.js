@@ -5,7 +5,7 @@ describe('cli-logger:', function() {
   it('should listen for write event', function(done) {
     var msg = 'mock write info';
     var name = 'mock-write-logger';
-    var conf = {name: name, streams: [{path: 'log/mock-write.log'}]};
+    var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
     var log = logger(conf);
     log.on('write', function(record, stream) {
       expect(record.pid).to.be.a('number');
@@ -20,7 +20,7 @@ describe('cli-logger:', function() {
   it('should listen for write event with error instance', function(done) {
     var msg = 'mock write info';
     var name = 'mock-write-logger';
-    var conf = {name: name, streams: [{path: 'log/mock-write.log'}]};
+    var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
     var log = logger(conf);
     log.on('write', function(record, stream) {
       expect(record.msg).to.eql(msg);

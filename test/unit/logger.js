@@ -21,6 +21,13 @@ describe('cli-logger:', function() {
     log.info();
     done();
   });
+  it('should log info message (json)', function(done) {
+    var name = 'mock-logger';
+    var conf = {name: name, json: true};
+    var log = logger(conf);
+    log.info('a mock info message');
+    done();
+  });
   it('should log info message', function(done) {
     var name = 'mock-logger';
     var conf = {name: name};
@@ -28,16 +35,9 @@ describe('cli-logger:', function() {
     log.info('a mock info message');
     done();
   });
-  it('should log info message (plain)', function(done) {
+  it('should log info message with parameters (json)', function(done) {
     var name = 'mock-logger';
-    var conf = {name: name, json: false};
-    var log = logger(conf);
-    log.info('a mock info message');
-    done();
-  });
-  it('should log info message with parameters', function(done) {
-    var name = 'mock-logger';
-    var conf = {name: name};
+    var conf = {name: name, json: true};
     var log = logger(conf);
     log.info('a mock %s message', 'info');
     done();

@@ -22,7 +22,7 @@ var levels = {
 
 var defaults = {
   name: basename(process.argv[1]),
-  json: true
+  json: false
 }
 
 /**
