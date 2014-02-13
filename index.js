@@ -34,7 +34,7 @@ var Logger = function(conf) {
     }
   }
   this.conf = merge(conf, merge(defaults, {}), filter);
-  this.conf.streams = this.conf.streams || {
+  this.conf.streams = conf.streams || {
     stream: process.stdout,
     level: levels.info
   }
@@ -51,25 +51,32 @@ util.inherits(Logger, events.EventEmitter);
  *  @api private
  */
 Logger.prototype.initialize = function() {
-  var streams = [];
-  var conf = this.conf;
+  var streams = [], scope = this;
   var source = this.conf.streams;
   function append(stream, level, name) {
+    stream.on('error', function(e) {
+      scope.emit('error', e, stream);
+    })
+    //console.log('adding stream %s', stream == process.stdout);
     streams.push({stream: stream, level: level || levels.info, name: name})
   }
   function wrap(source) {
-    append(source.stream, source.level, source.name || conf.name);
+    var stream = source.stream;
+    if(source.stream && !(source.stream instanceof Writable)
+      && source.stream !== process.stdout
+      && source.stream !== process.stderr) {
+      throw new Error('Invalid stream specified');
+    }
+    append(source.stream, source.level, source.name);
   }
   if(source && typeof(source) == 'object' && !Array.isArray(source)) {
-    if((source.stream instanceof Writable)
-      || source.stream === process.stdout
-      || source.stream === process.stderr) {
-      wrap(source);
-    }
+    wrap(source);
   }else if(Array.isArray(source)) {
     source.forEach(function(source) {
       wrap(source);
     })
+  }else{
+    throw new Error('Invalid streams configuration');
   }
   return streams;
 }
