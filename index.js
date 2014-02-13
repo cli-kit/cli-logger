@@ -54,7 +54,9 @@ Logger.prototype.getLogRecord = function(level, message) {
       pid: this.pid,
       hostname: this.hostname,
       name: this.conf.name,
-      msg: message
+      msg: message,
+      level: level,
+      time: new Date().toISOString()
     };
   }
   console.log('logging message...%j', record);
