@@ -138,6 +138,20 @@ Logger.prototype.getLogRecord = function(level, message) {
       }
     }
   }
+  return record;
+}
+
+/**
+ *  Write the log record to stream(s) or dispatch
+ *  the write event if there are listeners for the write
+ *  event.
+ *
+ *  @api private
+ *
+ *  @param level The log level.
+ *  @param record The log record.
+ */
+Logger.prototype.write = function(level, record) {
   //console.log('logging message...%j', record);
   var i, target, listeners = this.listeners('write');
   for(i = 0;i < this.streams.length;i++) {
@@ -166,8 +180,7 @@ Logger.prototype.getLogRecord = function(level, message) {
  */
 Logger.prototype.log = function(level, message) {
   if(!message) return false;
-  var record = this.getLogRecord.apply(this, arguments);
-  //console.log('logging message...%s', message);
+  this.write(level, this.getLogRecord.apply(this, arguments));
 }
 
 /**
