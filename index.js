@@ -106,30 +106,40 @@ Logger.prototype.initialize = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.getLogRecord = function(level, message) {
-  var parameters = [].slice.call(arguments, 2), args;
+  var parameters = [].slice.call(arguments, 2), args, z;
   var err = (message instanceof Error) ? message : null;
+  var obj = (!err && message && typeof(message) == 'object') ? message : null;
   if(parameters.length) {
-    parameters.unshift(message);
+    if(!err && !obj) {
+      parameters.unshift(message);
+    }
     message = util.format.apply(util, parameters);
   }
   if(err) {
     if(arguments.length == 2) {
       message = err.message;
-    }else{
-      args = [].slice.call(arguments, 2);
-      message = util.format.apply(util, args);
-    }
+    }//else{
+      //args = [].slice.call(arguments, 2);
+      //message = util.format.apply(util, args);
+    //}
   }
   var record = message;
   if(this.conf.json) {
-    record = {
-      pid: this.pid,
-      hostname: this.hostname,
-      name: this.conf.name,
-      msg: message,
-      level: level,
-      time: new Date().toISOString()
-    };
+    record = {};
+    if(obj) {
+      for(z in obj) {
+        record[z] = obj[z];
+      }
+      if(arguments.length == 2) {
+        message = '';
+      }
+    }
+    record.pid = this.pid;
+    record.hostname = this.hostname;
+    record.name = this.conf.name;
+    record.msg = message;
+    record.level = level;
+    record.time = new Date().toISOString();
     if(err) {
       record.err = {
         message: err.message,
@@ -152,7 +162,6 @@ Logger.prototype.getLogRecord = function(level, message) {
  *  @param record The log record.
  */
 Logger.prototype.write = function(level, record) {
-  //console.log('logging message...%j', record);
   var i, target, listeners = this.listeners('write');
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
