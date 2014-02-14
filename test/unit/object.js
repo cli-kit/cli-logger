@@ -13,7 +13,7 @@ describe('cli-logger:', function() {
     })
     log.info({req: {path: '/'}});
   });
-  it('should decorate json with properties (custom message)', function(done) {
+  it('should decorate json with properties (message)', function(done) {
     var msg = 'mock info message';
     var name = 'mock-object-logger';
     var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
@@ -25,5 +25,18 @@ describe('cli-logger:', function() {
       done();
     })
     log.info({req: {path: '/'}}, msg);
+  });
+  it('should decorate json with properties (message+parameters)', function(done) {
+    var expected = 'mock info message';
+    var name = 'mock-object-logger';
+    var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
+    var log = logger(conf);
+    log.on('write', function(record, stream) {
+      expect(record.msg).to.eql(expected);
+      expect(record.req).to.be.an('object');
+      expect(record.req.path).to.eql('/');
+      done();
+    })
+    log.info({req: {path: '/'}}, 'mock %s message', 'info');
   });
 })
