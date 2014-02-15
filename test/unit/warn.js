@@ -3,12 +3,16 @@ var logger = require('../..');
 
 describe('cli-logger:', function() {
   it('should log warn message', function(done) {
+    var msg = 'mock warn message';
     var name = 'mock-warn-logger';
     var conf = {name: name, level: logger.WARN};
     var log = logger(conf);
     expect(log.warn()).to.eql(true);
-    log.warn('mock warn message');
-    done();
+    log.on('write', function(record, stream) {
+      expect(record).to.eql(msg);
+      done();
+    })
+    log.warn(msg);
   });
   it('should ignore warn with error level', function(done) {
     var name = 'mock-warn-logger';
