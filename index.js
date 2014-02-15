@@ -15,12 +15,14 @@ var STREAM = 'stream';
 var FILE = 'file';
 
 var levels = {
+  all: 0,
   trace: 10,
   debug: 20,
   info: 30,
   warn: 40,
   error: 50,
-  fatal: 60
+  fatal: 60,
+  none: 70
 }
 
 var defaults = {
@@ -70,8 +72,7 @@ var Logger = function(conf) {
   }
   this.conf = merge(conf, merge(defaults, {}), filter);
   this.conf.streams = conf.streams || {
-    stream: process.stdout,
-    level: levels.info
+    stream: process.stdout
   }
   this.streams = this.initialize();
   this.pid = process.pid;
@@ -92,7 +93,8 @@ Logger.prototype.initialize = function() {
     stream.on('error', function(e) {
       scope.emit('error', e, stream);
     })
-    streams.push({stream: stream, level: level || levels.info, name: name})
+    streams.push({stream: stream,
+      level: level || scope.conf.level || levels.info, name: name})
   }
   function wrap(source) {
     var stream = source.stream;
@@ -260,16 +262,54 @@ Logger.prototype.info = function() {
   this.log.apply(this, args);
 }
 
+/**
+ *  Log a warn message.
+ *
+ *  @param message The log message.
+ *  @param ... The message replacement parameters.
+ */
+Logger.prototype.warn = function() {
+  var args = [].slice.call(arguments, 0);
+  args.unshift(levels.warn);
+  this.log.apply(this, args);
+}
+
+/**
+ *  Log an error message.
+ *
+ *  @param message The log message.
+ *  @param ... The message replacement parameters.
+ */
+Logger.prototype.error = function() {
+  var args = [].slice.call(arguments, 0);
+  args.unshift(levels.error);
+  this.log.apply(this, args);
+}
+
+/**
+ *  Log a fatal message.
+ *
+ *  @param message The log message.
+ *  @param ... The message replacement parameters.
+ */
+Logger.prototype.fatal = function() {
+  var args = [].slice.call(arguments, 0);
+  args.unshift(levels.fatal);
+  this.log.apply(this, args);
+}
+
 module.exports = function(conf) {
   var logger = new Logger(conf);
   return logger;
 }
 
 module.exports.Logger = Logger;
+module.exports.ALL = levels.all;
 module.exports.TRACE = levels.trace;
 module.exports.DEBUG = levels.debug;
 module.exports.INFO = levels.info;
 module.exports.WARN = levels.warn;
 module.exports.ERROR = levels.error;
 module.exports.FATAL = levels.fatal;
+module.exports.NONE = levels.none;
 module.exports.LOG_VERSION = major;
