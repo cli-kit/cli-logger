@@ -32,6 +32,25 @@ var defaults = {
 }
 
 /**
+ *  Resolve a level string name to the corresponding
+ *  integer value.
+ *
+ *  @param level A string or integer.
+ *
+ *  @return The level integer or undefined if a string value
+ *  does not correspond to a known log level.
+ */
+function resolve(level) {
+  var key, value;
+  if(typeof(level) == 'string') {
+    key = level.toLowerCase();
+    value = levels[key];
+    return value;
+  }
+  return level;
+}
+
+/**
  * Gather some caller info 3 stack levels up.
  *
  * See <http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi>.
@@ -225,6 +244,41 @@ Logger.prototype.log = function(level, message) {
   if(!level) return false;
   if(level && !message) return this.enabled(level);
   this.write(level, this.getLogRecord.apply(this, arguments));
+}
+
+/**
+ *  Get or set the current log level.
+ */
+Logger.prototype.level = function(level) {
+  var target = level;
+  level = resolve(level);
+  var i, stream, min, z, exists = false;
+  if(!arguments.length) {
+    min = levels.none;
+    for(i = 0;i < this.streams.length;i++) {
+      stream = this.streams[i];
+      min = Math.min(min, stream.level);
+    }
+    return min;
+  }else{
+    if(level === undefined) {
+      throw new Error('Unknown log level \'' + target + '\'')
+    }else{
+      for(z in levels) {
+        if(levels[z] === level) {
+          exists = true;
+          break;
+        }
+      }
+      if(!exists) {
+        throw new Error('Unknown log level \'' + target + '\'')
+      }
+    }
+    for(i = 0;i < this.streams.length;i++) {
+      stream = this.streams[i];
+      stream.level = level;
+    }
+  }
 }
 
 /**
