@@ -272,3 +272,4 @@ module.exports.INFO = levels.info;
 module.exports.WARN = levels.warn;
 module.exports.ERROR = levels.error;
 module.exports.FATAL = levels.fatal;
+module.exports.LOG_VERSION = major;
