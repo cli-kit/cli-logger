@@ -22,7 +22,35 @@ var levels = {
 
 var defaults = {
   name: basename(process.argv[1]),
-  json: false
+  json: false,
+  src: false
+}
+
+/**
+ * Gather some caller info 3 stack levels up.
+ *
+ * See <http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi>.
+ */
+function getCallerInfo() {
+  var obj = {stack: []};
+  var limit = Error.stackTraceLimit;
+  var prepare = Error.prepareStackTrace;
+  Error.captureStackTrace(this, getCallerInfo);
+  Error.prepareStackTrace = function (_, stack) {
+    var caller = stack[3];
+    obj.file = caller.getFileName();
+    obj.line = caller.getLineNumber();
+    var func = caller.getFunctionName();
+    if(func) obj.func = func;
+    obj.stack = stack.slice(3);
+    obj.stack.forEach(function(caller, index, arr) {
+      arr[index] = '' + caller;
+    })
+    return stack;
+  };
+  var stack = this.stack;
+  Error.prepareStackTrace = prepare;
+  return obj;
 }
 
 /**
@@ -118,10 +146,7 @@ Logger.prototype.getLogRecord = function(level, message) {
   if(err) {
     if(arguments.length == 2) {
       message = err.message;
-    }//else{
-      //args = [].slice.call(arguments, 2);
-      //message = util.format.apply(util, args);
-    //}
+    }
   }
   var record = message;
   if(this.conf.json) {
@@ -146,6 +171,9 @@ Logger.prototype.getLogRecord = function(level, message) {
         name: err.name,
         stack: err.stack
       }
+    }
+    if(this.conf.src) {
+      record.src = getCallerInfo();
     }
   }
   return record;
