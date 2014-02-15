@@ -14,8 +14,7 @@ var RAW = 'raw';
 var STREAM = 'stream';
 var FILE = 'file';
 
-var stash;
-var levels = {
+var LEVELS = {
   trace: 10,
   debug: 20,
   info: 30,
@@ -25,7 +24,18 @@ var levels = {
   none: 70
 }
 
-var keys = Object.keys(levels);
+var BITWISE = {
+  none: 0,
+  trace: 1,
+  debug: 2,
+  info: 4,
+  warn: 8,
+  error: 16,
+  fatal: 32,
+  all: 63
+}
+
+var keys = Object.keys(LEVELS);
 keys.pop();
 
 var defaults = {
@@ -33,33 +43,6 @@ var defaults = {
   json: false,
   src: false,
   console: false
-}
-
-/**
- *  Gather some caller info.
- *
- *  See <http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi>.
- */
-function getCallerInfo() {
-  var obj = {};
-  var limit = Error.stackTraceLimit;
-  var prepare = Error.prepareStackTrace;
-  Error.captureStackTrace(this, getCallerInfo);
-  Error.prepareStackTrace = function (_, stack) {
-    var caller = stack[3];
-    obj.file = caller.getFileName();
-    obj.line = caller.getLineNumber();
-    var func = caller.getFunctionName();
-    if(func) obj.func = func;
-    obj.stack = stack.slice(3);
-    obj.stack.forEach(function(caller, index, arr) {
-      arr[index] = '' + caller;
-    })
-    return stack;
-  };
-  var stack = this.stack;
-  Error.prepareStackTrace = prepare;
-  return obj;
 }
 
 /**
@@ -86,18 +69,17 @@ var Logger = function(conf, bitwise) {
   this.hostname = this.conf.hostname || os.hostname();
   if(this.conf.console) {
     this.writers = {};
-    this.writers[levels.trace] = console.log;
-    this.writers[levels.debug] = console.log;
-    this.writers[levels.info] = console.info;
-    this.writers[levels.warn] = console.warn;
-    this.writers[levels.error] = console.error;
-    this.writers[levels.fatal] = console.error;
+    this.writers[LEVELS.trace] = console.log;
+    this.writers[LEVELS.debug] = console.log;
+    this.writers[LEVELS.info] = console.info;
+    this.writers[LEVELS.warn] = console.warn;
+    this.writers[LEVELS.error] = console.error;
+    this.writers[LEVELS.fatal] = console.error;
   }
   this.streams = this.initialize();
 }
 
 util.inherits(Logger, events.EventEmitter);
-
 
 /**
  *  Configure bitwise log levels.
@@ -108,30 +90,11 @@ util.inherits(Logger, events.EventEmitter);
  *  should use bitwise operators.
  */
 Logger.prototype.configure = function(bitwise) {
-  if(bitwise) {
-    stash = {};
-    stash.none = levels.none;
-    var value = 1;
-    var keys = Object.keys(levels);
-    var none = keys.pop(), total = 0;
-    keys.forEach(function(key) {
-      stash[key] = levels[key];
-      levels[key] = value;
-      key = key.toUpperCase();
-      module.exports[key] = value;
-      total += value;
-      value *= 2;
-    })
-    module.exports.NONE = levels.none = 0;
-    module.exports.ALL = levels.all = total;
-  }else if(stash) {
-    for(var z in stash) {
-      levels[z] = stash[z];
-      module.exports[z.toUpperCase()] = levels[z];
-    }
-    delete levels.all;
-    delete module.exports.ALL;
-    stash = undefined;
+  this._levels = {}
+  var target = bitwise ? BITWISE : LEVELS;
+  for(var z in target) {
+    this._levels[z] = target[z];
+    this[z.toUpperCase()] = this._levels[z];
   }
 }
 
@@ -151,10 +114,10 @@ Logger.prototype.resolve = function(level) {
   var key, value, z, exists = false;
   if(typeof(level) == 'string') {
     key = level.toLowerCase();
-    level = levels[key];
+    level = this._levels[key];
   }
-  for(z in levels) {
-    if(levels[z] === level) {
+  for(z in this._levels) {
+    if(this._levels[z] === level) {
       exists = true;
       break;
     }
@@ -173,7 +136,7 @@ Logger.prototype.initialize = function() {
   var streams = [], scope = this;
   var source = this.conf.streams;
   function append(stream, level, name) {
-    var lvl = level || scope.conf.level || levels.info;
+    var lvl = level || scope.conf.level || scope._levels.info;
     streams.push({stream: stream,
       level: scope.resolve(lvl), name: name})
     stream.on('error', function(e) {
@@ -212,6 +175,37 @@ Logger.prototype.initialize = function() {
     throw new Error('Invalid streams configuration');
   }
   return streams;
+}
+
+/**
+ *  Retrieve caller info, used when the src configuration
+ *  property is true to determine the file and line number
+ *  that the log call came from.
+ *
+ *  @api private
+ *
+ *  @see http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
+ */
+Logger.prototype.getCallerInfo = function() {
+  var obj = {};
+  var limit = Error.stackTraceLimit;
+  var prepare = Error.prepareStackTrace;
+  Error.captureStackTrace(this, arguments.callee);
+  Error.prepareStackTrace = function (_, stack) {
+    var caller = stack[3];
+    obj.file = caller.getFileName();
+    obj.line = caller.getLineNumber();
+    var func = caller.getFunctionName();
+    if(func) obj.func = func;
+    obj.stack = stack.slice(3);
+    obj.stack.forEach(function(caller, index, arr) {
+      arr[index] = '' + caller;
+    })
+    return stack;
+  };
+  var stack = this.stack;
+  Error.prepareStackTrace = prepare;
+  return obj;
 }
 
 /**
@@ -266,7 +260,7 @@ Logger.prototype.getLogRecord = function(level, message) {
       }
     }
     if(this.conf.src) {
-      record.src = getCallerInfo();
+      record.src = this.getCallerInfo();
     }
     record.v = major;
   }
@@ -348,7 +342,7 @@ Logger.prototype.enabled = function(level) {
 Logger.prototype.level = function(level) {
   var i, stream, min;
   if(!arguments.length) {
-    min = levels.none;
+    min = this._levels.none;
     for(i = 0;i < this.streams.length;i++) {
       stream = this.streams[i];
       min = Math.min(min, stream.level);
@@ -370,9 +364,9 @@ Logger.prototype.level = function(level) {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.trace = function() {
-  if(!arguments.length) return this.enabled(levels.trace);
+  if(!arguments.length) return this.enabled(this._levels.trace);
   var args = [].slice.call(arguments, 0);
-  args.unshift(levels.trace);
+  args.unshift(this._levels.trace);
   this.log.apply(this, args);
 }
 
@@ -383,9 +377,9 @@ Logger.prototype.trace = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.debug = function() {
-  if(!arguments.length) return this.enabled(levels.debug);
+  if(!arguments.length) return this.enabled(this._levels.debug);
   var args = [].slice.call(arguments, 0);
-  args.unshift(levels.debug);
+  args.unshift(this._levels.debug);
   this.log.apply(this, args);
 }
 
@@ -396,9 +390,9 @@ Logger.prototype.debug = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.info = function() {
-  if(!arguments.length) return this.enabled(levels.info);
+  if(!arguments.length) return this.enabled(this._levels.info);
   var args = [].slice.call(arguments, 0);
-  args.unshift(levels.info);
+  args.unshift(this._levels.info);
   this.log.apply(this, args);
 }
 
@@ -409,9 +403,9 @@ Logger.prototype.info = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.warn = function() {
-  if(!arguments.length) return this.enabled(levels.warn);
+  if(!arguments.length) return this.enabled(this._levels.warn);
   var args = [].slice.call(arguments, 0);
-  args.unshift(levels.warn);
+  args.unshift(this._levels.warn);
   this.log.apply(this, args);
 }
 
@@ -422,9 +416,9 @@ Logger.prototype.warn = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.error = function() {
-  if(!arguments.length) return this.enabled(levels.error);
+  if(!arguments.length) return this.enabled(this._levels.error);
   var args = [].slice.call(arguments, 0);
-  args.unshift(levels.error);
+  args.unshift(this._levels.error);
   this.log.apply(this, args);
 }
 
@@ -435,9 +429,9 @@ Logger.prototype.error = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.fatal = function() {
-  if(!arguments.length) return this.enabled(levels.fatal);
+  if(!arguments.length) return this.enabled(this._levels.fatal);
   var args = [].slice.call(arguments, 0);
-  args.unshift(levels.fatal);
+  args.unshift(this._levels.fatal);
   this.log.apply(this, args);
 }
 
@@ -453,10 +447,11 @@ module.exports = function(conf, bitwise) {
   return logger;
 }
 
-module.exports.levels = levels;
+module.exports.levels = LEVELS;
+module.exports.bitwise = BITWISE;
 module.exports.keys = keys;
 module.exports.Logger = Logger;
-for(var z in levels) {
-  module.exports[z.toUpperCase()] = levels[z];
+for(var z in LEVELS) {
+  module.exports[z.toUpperCase()] = LEVELS[z];
 }
 module.exports.LOG_VERSION = major;
