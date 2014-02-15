@@ -120,7 +120,7 @@ Logger.prototype.initialize = function() {
       scope.emit('error', e, stream);
     })
     streams.push({stream: stream,
-      level: level || scope.conf.level || levels.info, name: name})
+      level: resolve(level || scope.conf.level || levels.info), name: name})
   }
   function wrap(source) {
     var stream = source.stream;

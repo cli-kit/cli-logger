@@ -11,7 +11,7 @@ describe('cli-logger:', function() {
   });
   it('should log info message', function(done) {
     var name = 'mock-info-logger';
-    var conf = {name: name};
+    var conf = {name: name, level: 'info'};
     var log = logger(conf);
     expect(log.info()).to.eql(true);
     log.info('mock info message');
