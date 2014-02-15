@@ -9,6 +9,7 @@ var merge = require('cli-util').merge;
 
 var pkg = require(path.join(__dirname, 'package.json'));
 var major = parseInt(pkg.version.split('.')[0]);
+var z;
 
 var RAW = 'raw';
 var STREAM = 'stream';
@@ -451,7 +452,10 @@ module.exports.levels = LEVELS;
 module.exports.bitwise = BITWISE;
 module.exports.keys = keys;
 module.exports.Logger = Logger;
-for(var z in LEVELS) {
+for(z in LEVELS) {
   module.exports[z.toUpperCase()] = LEVELS[z];
+}
+for(z in BITWISE) {
+  module.exports['BW_' + z.toUpperCase()] = BITWISE[z];
 }
 module.exports.LOG_VERSION = major;
