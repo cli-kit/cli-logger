@@ -92,9 +92,13 @@ function getCallerInfo() {
  *  Create a Logger instance.
  *
  *  @param conf The logger configuration.
+ *  @param bitwise A boolean indicating that log levels
+ *  should use bitwise operators.
  */
-var Logger = function(conf) {
+var Logger = function(conf, bitwise) {
   conf = conf || {};
+  conf.bitwise = (bitwise === true);
+  this.configure(bitwise);
   function filter(t, k, v) {
     if(k !== 'streams') {
       t[k] = v;
@@ -107,18 +111,54 @@ var Logger = function(conf) {
   this.pid = this.conf.pid || process.pid;
   this.hostname = this.conf.hostname || os.hostname();
   if(this.conf.console) {
-    var writers = this.writers = {};
-    writers[levels.trace] = console.log;
-    writers[levels.debug] = console.log;
-    writers[levels.info] = console.info;
-    writers[levels.warn] = console.warn;
-    writers[levels.error] = console.error;
-    writers[levels.fatal] = console.error;
+    this.writers = {};
+    this.writers[levels.trace] = console.log;
+    this.writers[levels.debug] = console.log;
+    this.writers[levels.info] = console.info;
+    this.writers[levels.warn] = console.warn;
+    this.writers[levels.error] = console.error;
+    this.writers[levels.fatal] = console.error;
   }
   this.streams = this.initialize();
 }
 
 util.inherits(Logger, events.EventEmitter);
+
+
+/**
+ *  Configure bitwise log levels.
+ *
+ *  @param bitwise A boolean indicating that log levels
+ *  should use bitwise operators.
+ */
+Logger.prototype.configure = function(bitwise) {
+  if(bitwise) {
+    stash = {};
+    stash.none = levels.none;
+    var value = 1;
+    var keys = Object.keys(levels);
+    var none = keys.pop(), total = 0;
+    keys.forEach(function(key) {
+      stash[key] = levels[key];
+      levels[key] = value;
+      key = key.toUpperCase();
+      module.exports[key] = value;
+      total += value;
+      value *= 2;
+    })
+    module.exports.NONE = levels.none = 0;
+    module.exports.ALL = levels.all = total;
+  }else if(stash) {
+    for(var z in stash) {
+      levels[z] = stash[z];
+      module.exports[z.toUpperCase()] = levels[z];
+    }
+    delete levels.all;
+    delete module.exports.ALL;
+    stash = undefined;
+  }
+}
+
 
 /**
  *  Initialize the output streams.
@@ -399,37 +439,11 @@ Logger.prototype.fatal = function() {
  *  Create a logger.
  *
  *  @param conf The logger configuration.
- *  @param bitwise A boolean indicating that
- *  you prefer to use bitwise operators for log
- *  levels.
+ *  @param bitwise A boolean indicating that log levels
+ *  should use bitwise operators.
  */
 module.exports = function(conf, bitwise) {
-  if(bitwise) {
-    stash = {};
-    stash.none = levels.none;
-    var value = 1;
-    var keys = Object.keys(levels);
-    var none = keys.pop(), total = 0;
-    keys.forEach(function(key) {
-      stash[key] = levels[key];
-      levels[key] = value;
-      key = key.toUpperCase();
-      module.exports[key] = value;
-      total += value;
-      value *= 2;
-    })
-    module.exports.NONE = levels.none = 0;
-    module.exports.ALL = levels.all = total;
-  }else if(stash) {
-    for(var z in stash) {
-      levels[z] = stash[z];
-      module.exports[z.toUpperCase()] = levels[z];
-    }
-    delete levels.all;
-    delete module.exports.ALL;
-    stash = undefined;
-  }
-  var logger = new Logger(conf);
+  var logger = new Logger(conf, bitwise);
   return logger;
 }
 
