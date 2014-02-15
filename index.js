@@ -15,7 +15,6 @@ var STREAM = 'stream';
 var FILE = 'file';
 
 var levels = {
-  all: 0,
   trace: 10,
   debug: 20,
   info: 30,
@@ -28,8 +27,11 @@ var levels = {
 var defaults = {
   name: basename(process.argv[1]),
   json: false,
-  src: false
+  src: false,
+  console: false
 }
+
+//var writers = {};
 
 /**
  *  Resolve a level string name to the corresponding
@@ -102,6 +104,15 @@ var Logger = function(conf) {
   }
   this.pid = this.conf.pid || process.pid;
   this.hostname = this.conf.hostname || os.hostname();
+  if(this.conf.console) {
+    var writers = this.writers = {};
+    writers[levels.trace] = console.log;
+    writers[levels.debug] = console.log;
+    writers[levels.info] = console.info;
+    writers[levels.warn] = console.warn;
+    writers[levels.error] = console.error;
+    writers[levels.fatal] = console.error;
+  }
   this.streams = this.initialize();
 }
 
@@ -116,8 +127,9 @@ Logger.prototype.initialize = function() {
   var streams = [], scope = this;
   var source = this.conf.streams;
   function append(stream, level, name) {
+    var lvl = level || scope.conf.level || levels.info;
     streams.push({stream: stream,
-      level: resolve(level || scope.conf.level || levels.info), name: name})
+      level: resolve(lvl), name: name})
     stream.on('error', function(e) {
       scope.emit('error', e, stream);
     })
@@ -144,6 +156,7 @@ Logger.prototype.initialize = function() {
     append(source.stream, source.level, source.name);
   }
   if(source && typeof(source) == 'object' && !Array.isArray(source)) {
+    //console.dir(source);
     wrap(source);
   }else if(Array.isArray(source)) {
     source.forEach(function(source) {
@@ -166,9 +179,10 @@ Logger.prototype.initialize = function() {
  */
 Logger.prototype.getLogRecord = function(level, message) {
   var parameters = [].slice.call(arguments, 2), args, z;
+  //var raw = parameters.slice(0);
   var err = (message instanceof Error) ? message : null;
   var obj = (!err && message && typeof(message) == 'object') ? message : null;
-  if(parameters.length) {
+  if(parameters.length && !this.conf.console) {
     if(!err && !obj) {
       parameters.unshift(message);
     }
@@ -180,7 +194,9 @@ Logger.prototype.getLogRecord = function(level, message) {
     }
   }
   var record = message;
-  if(this.conf.json) {
+  if(this.conf.console) {
+    record = {message: message, parameters: parameters};
+  }else if(this.conf.json) {
     record = {};
     record.time = new Date().toISOString();
     if(obj) {
@@ -227,12 +243,19 @@ Logger.prototype.write = function(level, record) {
     target = this.streams[i];
     if(!listeners.length && this.conf.json && target.type !== RAW) {
       record = JSON.stringify(record);
+    }else if(!this.conf.json) {
+
     }
     if(level >= target.level) {
       if(listeners.length) {
         this.emit('write', record, target.stream);
       }else{
-        target.stream.write(record + '\n');
+        if(this.conf.console && this.writers[level]) {
+          this.writers[level].apply(
+            console, [record.message].concat(record.parameters));
+        }else{
+          target.stream.write(record + '\n');
+        }
       }
     }
   }
@@ -377,6 +400,7 @@ module.exports = function(conf) {
   return logger;
 }
 
+module.exports.levels = levels;
 module.exports.Logger = Logger;
 module.exports.ALL = levels.all;
 module.exports.TRACE = levels.trace;
