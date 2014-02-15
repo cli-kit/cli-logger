@@ -7,6 +7,9 @@ var util = require('util');
 var Writable = require('stream').Writable;
 var merge = require('cli-util').merge;
 
+var pkg = require(path.join(__dirname, 'package.json'));
+var major = parseInt(pkg.version.split('.')[0]);
+
 var RAW = 'raw';
 var STREAM = 'stream';
 var FILE = 'file';
@@ -175,6 +178,7 @@ Logger.prototype.getLogRecord = function(level, message) {
     if(this.conf.src) {
       record.src = getCallerInfo();
     }
+    record.v = major;
   }
   return record;
 }
