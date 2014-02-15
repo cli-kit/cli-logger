@@ -58,12 +58,12 @@ function resolve(level) {
 }
 
 /**
- * Gather some caller info 3 stack levels up.
+ *  Gather some caller info.
  *
- * See <http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi>.
+ *  See <http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi>.
  */
 function getCallerInfo() {
-  var obj = {stack: []};
+  var obj = {};
   var limit = Error.stackTraceLimit;
   var prepare = Error.prepareStackTrace;
   Error.captureStackTrace(this, getCallerInfo);
