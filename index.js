@@ -14,6 +14,7 @@ var RAW = 'raw';
 var STREAM = 'stream';
 var FILE = 'file';
 
+var stash;
 var levels = {
   trace: 10,
   debug: 20,
@@ -30,8 +31,6 @@ var defaults = {
   src: false,
   console: false
 }
-
-//var writers = {};
 
 /**
  *  Resolve a level string name to the corresponding
@@ -393,14 +392,46 @@ Logger.prototype.fatal = function() {
   this.log.apply(this, args);
 }
 
-module.exports = function(conf) {
+/**
+ *  Create a logger.
+ *
+ *  @param conf The logger configuration.
+ *  @param bitwise A boolean indicating that
+ *  you prefer to use bitwise operators for log
+ *  levels.
+ */
+module.exports = function(conf, bitwise) {
+  if(bitwise) {
+    stash = {};
+    stash.none = levels.none;
+    var value = 1;
+    var keys = Object.keys(levels);
+    var none = keys.pop(), total = 0;
+    keys.forEach(function(key) {
+      stash[key] = levels[key];
+      levels[key] = value;
+      key = key.toUpperCase();
+      module.exports[key] = value;
+      total += value;
+      value *= 2;
+    })
+    module.exports.NONE = levels.none = 0;
+    module.exports.ALL = levels.all = total;
+  }else if(stash) {
+    for(var z in stash) {
+      levels[z] = stash[z];
+      module.exports[z.toUpperCase()] = levels[z];
+    }
+    delete levels.all;
+    delete module.exports.ALL;
+    stash = undefined;
+  }
   var logger = new Logger(conf);
   return logger;
 }
 
 module.exports.levels = levels;
 module.exports.Logger = Logger;
-module.exports.ALL = levels.all;
 module.exports.TRACE = levels.trace;
 module.exports.DEBUG = levels.debug;
 module.exports.INFO = levels.info;
