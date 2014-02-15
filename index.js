@@ -116,11 +116,11 @@ Logger.prototype.initialize = function() {
   var streams = [], scope = this;
   var source = this.conf.streams;
   function append(stream, level, name) {
+    streams.push({stream: stream,
+      level: resolve(level || scope.conf.level || levels.info), name: name})
     stream.on('error', function(e) {
       scope.emit('error', e, stream);
     })
-    streams.push({stream: stream,
-      level: resolve(level || scope.conf.level || levels.info), name: name})
   }
   function wrap(source) {
     var stream = source.stream;
