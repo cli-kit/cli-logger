@@ -248,9 +248,13 @@ Logger.prototype.log = function(level, message) {
 
 /**
  *  Get or set the current log level.
+ *
+ *  @param level A log level to set on all streams.
+ *
+ *  @return The lowest log level when no arguments are specified.
  */
 Logger.prototype.level = function(level) {
-  var target = level;
+  var msg = 'Unknown log level \'' + level + '\'';
   level = resolve(level);
   var i, stream, min, z, exists = false;
   if(!arguments.length) {
@@ -261,19 +265,13 @@ Logger.prototype.level = function(level) {
     }
     return min;
   }else{
-    if(level === undefined) {
-      throw new Error('Unknown log level \'' + target + '\'')
-    }else{
-      for(z in levels) {
-        if(levels[z] === level) {
-          exists = true;
-          break;
-        }
-      }
-      if(!exists) {
-        throw new Error('Unknown log level \'' + target + '\'')
+    for(z in levels) {
+      if(levels[z] === level) {
+        exists = true;
+        break;
       }
     }
+    if(level === undefined || !exists) throw new Error(msg);
     for(i = 0;i < this.streams.length;i++) {
       stream = this.streams[i];
       stream.level = level;
