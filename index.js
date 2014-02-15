@@ -1,15 +1,13 @@
 var events = require('events');
 var fs = require('fs');
 var os = require('os');
-var path = require('path'),
-  basename = path.basename;
+var path = require('path'), basename = path.basename;
 var util = require('util');
 var Writable = require('stream').Writable;
 var merge = require('cli-util').merge;
 
 var pkg = require(path.join(__dirname, 'package.json'));
-var major = parseInt(pkg.version.split('.')[0]);
-var z;
+var major = parseInt(pkg.version.split('.')[0]), z;
 
 var RAW = 'raw';
 var STREAM = 'stream';
@@ -467,8 +465,7 @@ Logger.prototype.fatal = function() {
  *  should use bitwise operators.
  */
 module.exports = function(conf, bitwise) {
-  var logger = new Logger(conf, bitwise);
-  return logger;
+  return new Logger(conf, bitwise);
 }
 
 module.exports.levels = LEVELS;
