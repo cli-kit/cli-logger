@@ -6,6 +6,7 @@ describe('cli-logger:', function() {
     var name = 'mock-trace-logger';
     var conf = {name: name, level: logger.TRACE};
     var log = logger(conf);
+    expect(log.trace()).to.eql(true);
     log.trace('mock trace message');
     done();
   });
@@ -13,6 +14,7 @@ describe('cli-logger:', function() {
     var name = 'mock-trace-logger';
     var conf = {name: name};
     var log = logger(conf);
+    expect(log.trace()).to.eql(false);
     log.trace('mock %s message to ignore', 'trace');
     done();
   });

@@ -6,6 +6,7 @@ describe('cli-logger:', function() {
     var name = 'mock-error-logger';
     var conf = {name: name, level: logger.ERROR};
     var log = logger(conf);
+    expect(log.error()).to.eql(true);
     log.error('mock error message');
     done();
   });
@@ -13,6 +14,7 @@ describe('cli-logger:', function() {
     var name = 'mock-error-logger';
     var conf = {name: name, level: logger.FATAL};
     var log = logger(conf);
+    expect(log.error()).to.eql(false);
     log.error('mock %s message to ignore', 'error');
     done();
   });

@@ -13,6 +13,7 @@ describe('cli-logger:', function() {
     var name = 'mock-info-logger';
     var conf = {name: name};
     var log = logger(conf);
+    expect(log.info()).to.eql(true);
     log.info('mock info message');
     done();
   });
@@ -27,6 +28,7 @@ describe('cli-logger:', function() {
     var name = 'mock-info-logger';
     var conf = {name: name, level: logger.ERROR};
     var log = logger(conf);
+    expect(log.info()).to.eql(false);
     log.info('mock %s message to ignore', 'info');
     done();
   });

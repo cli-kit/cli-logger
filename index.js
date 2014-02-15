@@ -222,8 +222,25 @@ Logger.prototype.write = function(level, record) {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.log = function(level, message) {
-  if(!message) return false;
+  if(!level) return false;
+  if(level && !message) return this.enabled(level);
   this.write(level, this.getLogRecord.apply(this, arguments));
+}
+
+/**
+ *  Determine if a log level is enabled.
+ *
+ *  @param level The target log level.
+ */
+Logger.prototype.enabled = function(level) {
+  var stream;
+  for(var i = 0;i < this.streams.length;i++) {
+    stream = this.streams[i];
+    if(level >= stream.level) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -233,6 +250,7 @@ Logger.prototype.log = function(level, message) {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.trace = function() {
+  if(!arguments.length) return this.enabled(levels.trace);
   var args = [].slice.call(arguments, 0);
   args.unshift(levels.trace);
   this.log.apply(this, args);
@@ -245,6 +263,7 @@ Logger.prototype.trace = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.debug = function() {
+  if(!arguments.length) return this.enabled(levels.debug);
   var args = [].slice.call(arguments, 0);
   args.unshift(levels.debug);
   this.log.apply(this, args);
@@ -257,6 +276,7 @@ Logger.prototype.debug = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.info = function() {
+  if(!arguments.length) return this.enabled(levels.info);
   var args = [].slice.call(arguments, 0);
   args.unshift(levels.info);
   this.log.apply(this, args);
@@ -269,6 +289,7 @@ Logger.prototype.info = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.warn = function() {
+  if(!arguments.length) return this.enabled(levels.warn);
   var args = [].slice.call(arguments, 0);
   args.unshift(levels.warn);
   this.log.apply(this, args);
@@ -281,6 +302,7 @@ Logger.prototype.warn = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.error = function() {
+  if(!arguments.length) return this.enabled(levels.error);
   var args = [].slice.call(arguments, 0);
   args.unshift(levels.error);
   this.log.apply(this, args);
@@ -293,6 +315,7 @@ Logger.prototype.error = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.fatal = function() {
+  if(!arguments.length) return this.enabled(levels.fatal);
   var args = [].slice.call(arguments, 0);
   args.unshift(levels.fatal);
   this.log.apply(this, args);

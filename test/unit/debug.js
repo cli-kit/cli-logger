@@ -6,6 +6,7 @@ describe('cli-logger:', function() {
     var name = 'mock-debug-logger';
     var conf = {name: name, level: logger.DEBUG};
     var log = logger(conf);
+    expect(log.debug()).to.eql(true);
     log.debug('mock debug message');
     done();
   });
@@ -13,6 +14,7 @@ describe('cli-logger:', function() {
     var name = 'mock-debug-logger';
     var conf = {name: name};
     var log = logger(conf);
+    expect(log.debug()).to.eql(false);
     log.debug('mock %s message to ignore', 'debug');
     done();
   });
