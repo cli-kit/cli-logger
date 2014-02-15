@@ -36,32 +36,6 @@ var defaults = {
 }
 
 /**
- *  Resolve a level string name to the corresponding
- *  integer value.
- *
- *  @param level A string or integer.
- *
- *  @return The level integer or undefined if a string value
- *  does not correspond to a known log level.
- */
-function resolve(level) {
-  var msg = 'Unknown log level \'' + level + '\'';
-  var key, value, z, exists = false;
-  if(typeof(level) == 'string') {
-    key = level.toLowerCase();
-    level = levels[key];
-  }
-  for(z in levels) {
-    if(levels[z] === level) {
-      exists = true;
-      break;
-    }
-  }
-  if(level === undefined || !exists) throw new Error(msg);
-  return level;
-}
-
-/**
  *  Gather some caller info.
  *
  *  See <http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi>.
@@ -128,6 +102,8 @@ util.inherits(Logger, events.EventEmitter);
 /**
  *  Configure bitwise log levels.
  *
+ *  @api private
+ *
  *  @param bitwise A boolean indicating that log levels
  *  should use bitwise operators.
  */
@@ -159,6 +135,34 @@ Logger.prototype.configure = function(bitwise) {
   }
 }
 
+/**
+ *  Resolve a level string name to the corresponding
+ *  integer value.
+ *
+ *  @api private
+ *
+ *  @param level A string or integer.
+ *
+ *  @return The level integer or undefined if a string value
+ *  does not correspond to a known log level.
+ */
+Logger.prototype.resolve = function(level) {
+  var msg = 'Unknown log level \'' + level + '\'';
+  var key, value, z, exists = false;
+  if(typeof(level) == 'string') {
+    key = level.toLowerCase();
+    level = levels[key];
+  }
+  for(z in levels) {
+    if(levels[z] === level) {
+      exists = true;
+      break;
+    }
+  }
+  if(level === undefined || !exists) throw new Error(msg);
+  return level;
+}
+
 
 /**
  *  Initialize the output streams.
@@ -171,7 +175,7 @@ Logger.prototype.initialize = function() {
   function append(stream, level, name) {
     var lvl = level || scope.conf.level || levels.info;
     streams.push({stream: stream,
-      level: resolve(lvl), name: name})
+      level: scope.resolve(lvl), name: name})
     stream.on('error', function(e) {
       scope.emit('error', e, stream);
     })
@@ -317,6 +321,24 @@ Logger.prototype.log = function(level, message) {
 }
 
 /**
+ *  Determine if a log level is enabled.
+ *
+ *  @api private
+ *
+ *  @param level The target log level.
+ */
+Logger.prototype.enabled = function(level) {
+  var stream;
+  for(var i = 0;i < this.streams.length;i++) {
+    stream = this.streams[i];
+    if(level >= stream.level) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  *  Get or set the current log level.
  *
  *  @param level A log level to set on all streams.
@@ -333,28 +355,12 @@ Logger.prototype.level = function(level) {
     }
     return min;
   }else{
-    level = resolve(level);
+    level = this.resolve(level);
     for(i = 0;i < this.streams.length;i++) {
       stream = this.streams[i];
       stream.level = level;
     }
   }
-}
-
-/**
- *  Determine if a log level is enabled.
- *
- *  @param level The target log level.
- */
-Logger.prototype.enabled = function(level) {
-  var stream;
-  for(var i = 0;i < this.streams.length;i++) {
-    stream = this.streams[i];
-    if(level >= stream.level) {
-      return true;
-    }
-  }
-  return false;
 }
 
 /**
@@ -450,11 +456,7 @@ module.exports = function(conf, bitwise) {
 module.exports.levels = levels;
 module.exports.keys = keys;
 module.exports.Logger = Logger;
-module.exports.TRACE = levels.trace;
-module.exports.DEBUG = levels.debug;
-module.exports.INFO = levels.info;
-module.exports.WARN = levels.warn;
-module.exports.ERROR = levels.error;
-module.exports.FATAL = levels.fatal;
-module.exports.NONE = levels.none;
+for(var z in levels) {
+  module.exports[z.toUpperCase()] = levels[z];
+}
 module.exports.LOG_VERSION = major;
