@@ -243,8 +243,6 @@ Logger.prototype.write = function(level, record) {
     target = this.streams[i];
     if(!listeners.length && this.conf.json && target.type !== RAW) {
       record = JSON.stringify(record);
-    }else if(!this.conf.json) {
-
     }
     if(level >= target.level) {
       if(listeners.length) {
