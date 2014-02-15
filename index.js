@@ -41,12 +41,19 @@ var defaults = {
  *  does not correspond to a known log level.
  */
 function resolve(level) {
-  var key, value;
+  var msg = 'Unknown log level \'' + level + '\'';
+  var key, value, z, exists = false;
   if(typeof(level) == 'string') {
     key = level.toLowerCase();
-    value = levels[key];
-    return value;
+    level = levels[key];
   }
+  for(z in levels) {
+    if(levels[z] === level) {
+      exists = true;
+      break;
+    }
+  }
+  if(level === undefined || !exists) throw new Error(msg);
   return level;
 }
 
@@ -254,9 +261,7 @@ Logger.prototype.log = function(level, message) {
  *  @return The lowest log level when no arguments are specified.
  */
 Logger.prototype.level = function(level) {
-  var msg = 'Unknown log level \'' + level + '\'';
-  level = resolve(level);
-  var i, stream, min, z, exists = false;
+  var i, stream, min;
   if(!arguments.length) {
     min = levels.none;
     for(i = 0;i < this.streams.length;i++) {
@@ -265,13 +270,7 @@ Logger.prototype.level = function(level) {
     }
     return min;
   }else{
-    for(z in levels) {
-      if(levels[z] === level) {
-        exists = true;
-        break;
-      }
-    }
-    if(level === undefined || !exists) throw new Error(msg);
+    level = resolve(level);
     for(i = 0;i < this.streams.length;i++) {
       stream = this.streams[i];
       stream.level = level;
