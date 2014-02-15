@@ -77,7 +77,7 @@ var Logger = function(conf, bitwise) {
     this.writers[LEVELS.error] = console.error;
     this.writers[LEVELS.fatal] = console.error;
   }
-  this.streams = this.initialize();
+  this.initialize();
 }
 
 util.inherits(Logger, events.EventEmitter);
@@ -134,48 +134,64 @@ Logger.prototype.resolve = function(level) {
  *  @api private
  */
 Logger.prototype.initialize = function() {
-  var streams = [], scope = this;
-  var source = this.conf.streams;
-  function append(stream, level, name) {
-    var lvl = level || scope.conf.level || scope._levels.info;
-    streams.push({stream: stream,
-      level: scope.resolve(lvl), name: name})
-    stream.on('error', function(e) {
-      scope.emit('error', e, stream);
-    })
-  }
-  function wrap(source) {
-    var stream = source.stream;
-    if(source.path) {
-      var opts = {
-        flags: source.flags || 'a',
-        mode: source.mode,
-        encoding: source.encoding
-      }
-      try {
-        source.stream = fs.createWriteStream(source.path, opts);
-      }catch(e) {
-        scope.emit('error', e);
-      }
-    }
-    if(source.stream && !(source.stream instanceof Writable)
-      && source.stream !== process.stdout
-      && source.stream !== process.stderr) {
-      throw new Error('Invalid stream specified');
-    }
-    append(source.stream, source.level, source.name);
-  }
+  this.streams = [];
+  var source = this.conf.streams, i;
   if(source && typeof(source) == 'object' && !Array.isArray(source)) {
-    //console.dir(source);
-    wrap(source);
+    this.convert(source);
   }else if(Array.isArray(source)) {
-    source.forEach(function(source) {
-      wrap(source);
-    })
+    for(i = 0;i < source.length;i++) {
+      this.convert(source[i]);
+    }
   }else{
     throw new Error('Invalid streams configuration');
   }
-  return streams;
+}
+
+/**
+ *  Append a stream.
+ *
+ *  @api private
+ */
+Logger.prototype.append = function(stream, level, name) {
+  var scope = this;
+  var lvl = level || this.conf.level || this._levels.info;
+  this.streams.push({
+    stream: stream,
+    level: scope.resolve(lvl),
+    name: name});
+  stream.on('error', function(e) {
+    scope.emit('error', e, stream);
+  })
+}
+
+/**
+ *  Convert a stream configuration object into a
+ *  stream instance.
+ *
+ *  @api private
+ *
+ *  @param source The configuration stream object.
+ */
+Logger.prototype.convert = function(source) {
+  var stream = source.stream, opts;
+  if(source.path) {
+    opts = {
+      flags: source.flags || 'a',
+      mode: source.mode,
+      encoding: source.encoding
+    }
+    try {
+      source.stream = fs.createWriteStream(source.path, opts);
+    }catch(e) {
+      this.emit('error', e);
+    }
+  }
+  if(source.stream && !(source.stream instanceof Writable)
+    && source.stream !== process.stdout
+    && source.stream !== process.stderr) {
+    throw new Error('Invalid stream specified');
+  }
+  this.append(source.stream, source.level, source.name);
 }
 
 /**
@@ -298,6 +314,7 @@ Logger.prototype.write = function(level, record) {
       }
     }
   }
+  return (listeners.length === 0);
 }
 
 /**
@@ -312,7 +329,7 @@ Logger.prototype.write = function(level, record) {
 Logger.prototype.log = function(level, message) {
   if(!level) return false;
   if(level && !message) return this.enabled(level);
-  this.write(level, this.getLogRecord.apply(this, arguments));
+  return this.write(level, this.getLogRecord.apply(this, arguments));
 }
 
 /**
@@ -365,10 +382,11 @@ Logger.prototype.level = function(level) {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.trace = function() {
-  if(!arguments.length) return this.enabled(this._levels.trace);
+  var lvl = this._levels.trace;
+  if(!arguments.length) return this.enabled(lvl);
   var args = [].slice.call(arguments, 0);
-  args.unshift(this._levels.trace);
-  this.log.apply(this, args);
+  args.unshift(lvl);
+  return this.log.apply(this, args);
 }
 
 /**
@@ -378,10 +396,11 @@ Logger.prototype.trace = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.debug = function() {
-  if(!arguments.length) return this.enabled(this._levels.debug);
+  var lvl = this._levels.debug;
+  if(!arguments.length) return this.enabled(lvl);
   var args = [].slice.call(arguments, 0);
-  args.unshift(this._levels.debug);
-  this.log.apply(this, args);
+  args.unshift(lvl);
+  return this.log.apply(this, args);
 }
 
 /**
@@ -391,10 +410,11 @@ Logger.prototype.debug = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.info = function() {
-  if(!arguments.length) return this.enabled(this._levels.info);
+  var lvl = this._levels.info;
+  if(!arguments.length) return this.enabled(lvl);
   var args = [].slice.call(arguments, 0);
-  args.unshift(this._levels.info);
-  this.log.apply(this, args);
+  args.unshift(lvl);
+  return this.log.apply(this, args);
 }
 
 /**
@@ -404,10 +424,11 @@ Logger.prototype.info = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.warn = function() {
-  if(!arguments.length) return this.enabled(this._levels.warn);
+  var lvl = this._levels.warn;
+  if(!arguments.length) return this.enabled(lvl);
   var args = [].slice.call(arguments, 0);
-  args.unshift(this._levels.warn);
-  this.log.apply(this, args);
+  args.unshift(lvl);
+  return this.log.apply(this, args);
 }
 
 /**
@@ -417,10 +438,11 @@ Logger.prototype.warn = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.error = function() {
-  if(!arguments.length) return this.enabled(this._levels.error);
+  var lvl = this._levels.error;
+  if(!arguments.length) return this.enabled(lvl);
   var args = [].slice.call(arguments, 0);
-  args.unshift(this._levels.error);
-  this.log.apply(this, args);
+  args.unshift(lvl);
+  return this.log.apply(this, args);
 }
 
 /**
@@ -430,10 +452,11 @@ Logger.prototype.error = function() {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.fatal = function() {
-  if(!arguments.length) return this.enabled(this._levels.fatal);
+  var lvl = this._levels.fatal;
+  if(!arguments.length) return this.enabled(lvl);
   var args = [].slice.call(arguments, 0);
-  args.unshift(this._levels.fatal);
-  this.log.apply(this, args);
+  args.unshift(lvl);
+  return this.log.apply(this, args);
 }
 
 /**
