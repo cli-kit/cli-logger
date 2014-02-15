@@ -25,6 +25,9 @@ var levels = {
   none: 70
 }
 
+var keys = Object.keys(levels);
+keys.pop();
+
 var defaults = {
   name: basename(process.argv[1]),
   json: false,
@@ -431,6 +434,7 @@ module.exports = function(conf, bitwise) {
 }
 
 module.exports.levels = levels;
+module.exports.keys = keys;
 module.exports.Logger = Logger;
 module.exports.TRACE = levels.trace;
 module.exports.DEBUG = levels.debug;
