@@ -100,9 +100,9 @@ var Logger = function(conf) {
   this.conf.streams = conf.streams || {
     stream: process.stdout
   }
+  this.pid = this.conf.pid || process.pid;
+  this.hostname = this.conf.hostname || os.hostname();
   this.streams = this.initialize();
-  this.pid = process.pid;
-  this.hostname = os.hostname();
 }
 
 util.inherits(Logger, events.EventEmitter);
@@ -182,6 +182,7 @@ Logger.prototype.getLogRecord = function(level, message) {
   var record = message;
   if(this.conf.json) {
     record = {};
+    record.time = new Date().toISOString();
     if(obj) {
       for(z in obj) {
         record[z] = obj[z];
@@ -195,7 +196,6 @@ Logger.prototype.getLogRecord = function(level, message) {
     record.name = this.conf.name;
     record.msg = message;
     record.level = level;
-    record.time = new Date().toISOString();
     if(err) {
       record.err = {
         message: err.message,
