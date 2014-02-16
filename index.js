@@ -306,7 +306,7 @@ Logger.prototype.write = function(level, record) {
     if(!listeners.length && this.conf.json && target.type !== RAW) {
       record = JSON.stringify(record);
     }
-    if(level >= target.level) {
+    if(this.enabled(level, target.level)) {
       if(listeners.length) {
         this.emit('write', record, target.stream);
       }else{
@@ -342,14 +342,29 @@ Logger.prototype.log = function(level, message) {
  *
  *  @api private
  *
- *  @param level The target log level.
+ *  @param level The log level.
+ *  @param source A source log level configured on a stream.
  */
-Logger.prototype.enabled = function(level) {
-  var stream;
-  for(var i = 0;i < this.streams.length;i++) {
-    stream = this.streams[i];
-    if(level >= stream.level) {
-      return true;
+Logger.prototype.enabled = function(level, source) {
+  var stream, bitwise = this.conf.bitwise, i;
+  if(arguments.length === 1) {
+    for(i = 0;i < this.streams.length;i++) {
+      stream = this.streams[i];
+      if(bitwise) {
+        if((stream.level&level) === level) {
+          return true;
+        }
+      }else{
+        if(level >= stream.level) {
+          return true;
+        }
+      }
+    }
+  }else{
+    if(bitwise) {
+      return (source&level) === level;
+    }else{
+      return level >= source;
     }
   }
   return false;
