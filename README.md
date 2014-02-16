@@ -23,7 +23,7 @@ npm test
 
 ## Usage
 
-Unless [streams](#streams) have been configured all logging is routed to `process.stdout`.
+Unless [streams](#streams) have been configured all log messages are written to `process.stdout`.
 
 ### Normal
 
@@ -58,9 +58,45 @@ logger.info('mock %s message', 'info');
 
 Note that in normal mode you may use string log levels, such as `'trace'`, but in bitwise mode you may only use integer log levels.
 
+## Configuration
+
+* `name`: The name of the logger, default is `basename(process.argv[1])`.
+* `json`: Print log records as newline delimited JSON, default is `false`.
+* `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`.
+* `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`.
+* `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`.
+* `streams`: An array or object that configures the streams log records are written to, by default if this property is not present a single stream is configured for `process.stdout`.
+
 ## Streams
 
-TODO
+Configuring output streams is typically done using an array, but as a convenience an object may be specified to configure a single output stream:
+
+```javascript
+var log = require('cli-logger');
+var conf = {streams: {stream: process.stderr, level: log.WARN}}
+var logger = log(conf);
+// ...
+```
+
+### File
+
+You may configure a file stream by using the `path` stream property. For example, to log the `INFO` level and above to `stdout` and `ERROR` and above to a file:
+
+```javascript
+var log = require('cli-logger');
+var conf = {streams: [
+  {
+    stream: process.stdout,
+    level: log.INFO
+  },
+  {
+    path: 'log/errors.log',
+    level: log.ERROR
+  }
+]};
+var logger = log(conf);
+// ...
+```
 
 ## License
 
