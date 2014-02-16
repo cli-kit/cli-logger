@@ -14,7 +14,7 @@ describe('cli-logger:', function() {
     expect(log.info()).to.eql(true);
     log.info(msg);
   });
-  it('should ignore info with error+trace level (bitwise)', function(done) {
+  it('should ignore info with error|trace level (bitwise)', function(done) {
     var name = 'mock-info-logger';
     var conf = {name: name, level: logger.BW_ERROR|logger.BW_TRACE};
     var log = logger(conf, true);
