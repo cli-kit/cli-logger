@@ -71,6 +71,9 @@ var Logger = function(conf, bitwise, parent) {
     stream: process.stdout
   }
   var target = parent ? merge(parent.conf, {}, filter) : merge(defaults, {});
+  //if(parent) delete target.streams;
+  //console.dir(conf);
+  //console.dir(target);
   this.conf = merge(conf, target, filter);
   conf.streams = streams;
   this.pid = this.conf.pid || process.pid;
@@ -86,8 +89,8 @@ var Logger = function(conf, bitwise, parent) {
     this.writers[LEVELS.fatal] = console.error;
   }
   this.fields = {};
-  //this.streams = parent ? parent.streams.slice(0) : [];
   this.streams = [];
+  //this.streams = [];
   this.initialize(streams);
 }
 
