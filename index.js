@@ -34,15 +34,8 @@ var BITWISE = {
   all: 63
 }
 
-var keys = Object.keys(LEVELS);
-keys.pop();
-
-var types = [
-  RAW,
-  STREAM,
-  FILE
-]
-
+var keys = Object.keys(LEVELS); keys.pop();
+var types = [RAW, STREAM, FILE];
 var defaults = {
   name: basename(process.argv[1]),
   json: false,
@@ -251,6 +244,22 @@ Logger.prototype.getCallerInfo = function() {
 }
 
 /**
+ *  Translate a bitwise log level to a normal mode
+ *  log level.
+ *
+ *  @param level The bitwise log level.
+ *
+ *  @return A normal mode log level.
+ */
+Logger.prototype.translate = function(level) {
+  for(var i = 0;i < keys.length;i++) {
+    if(BITWISE[keys[i]] === level) {
+      return LEVELS[keys[i]];
+    }
+  }
+}
+
+/**
  *  Retrieve a log record.
  *
  *  @api private
@@ -322,6 +331,7 @@ Logger.prototype.write = function(level, record, parameters) {
       record.msg = util.format.apply(util, params);
     }
     if(json && (target.type !== RAW)) {
+      if(this.conf.bitwise) record.level = this.translate(record.level);
       record = JSON.stringify(record);
     }
     if(this.enabled(level, target.level)) {
