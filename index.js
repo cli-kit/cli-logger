@@ -366,7 +366,7 @@ Logger.prototype.write = function(level, record, parameters) {
       || (this.conf.json && !listeners.length);
     if(json && (target.type !== RAW)) {
       if(this.bitwise) record.level = this.translate(record.level);
-      record = JSON.stringify(record);
+      record = JSON.stringify(record, circular());
     }
     if(this.enabled(level, target.level)) {
       if(listeners.length) {
