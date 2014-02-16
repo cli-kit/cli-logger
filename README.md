@@ -46,6 +46,15 @@ logger = log(conf, true);
 logger.info('mock %s message', 'info');
 ```
 
+If you just want to disable one or two log levels it is more convenient to use the `XOR` operator:
+
+```javascript
+var log = require('cli-logger');
+var conf = {level: log.BW_ALL^log.BW_TRACE};
+logger = log(conf, true);
+logger.info('mock %s message', 'info');
+```
+
 ## Streams
 
 TODO
