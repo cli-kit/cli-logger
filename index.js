@@ -47,6 +47,20 @@ var defaults = {
   streams: null
 }
 
+function circular() {
+  var seen = [];
+  return function (key, val) {
+    if (!val || typeof (val) !== 'object') {
+      return val;
+    }
+    if (seen.indexOf(val) !== -1) {
+      return '[Circular]';
+    }
+    seen.push(val);
+    return val;
+  };
+}
+
 /**
  *  Create a Logger instance.
  *
@@ -631,6 +645,25 @@ RingBuffer.prototype.write = function(chunk) {
   }
 }
 
+var serializers = {};
+serializers.req = function req(request) {
+  if(!request || !request.connection) return request;
+  return {
+    method: request.method,
+    url: request.url,
+    headers: request.headers,
+    remoteAddress: request.connection.remoteAddress,
+    remotePort: request.connection.remotePort
+  };
+}
+serializers.res = function res(result) {
+  if(!result || !result.statusCode) return result;
+  return {
+    statusCode: result.statusCode,
+    header: result._header
+  };
+}
+
 /**
  *  Create a logger.
  *
@@ -646,6 +679,8 @@ module.exports.levels = LEVELS;
 module.exports.bitwise = BITWISE;
 module.exports.types = types;
 module.exports.keys = keys;
+module.exports.serializers = serializers;
+module.exports.circular = circular;
 module.exports.Logger = Logger;
 module.exports.RingBuffer = RingBuffer;
 for(z in LEVELS) {
