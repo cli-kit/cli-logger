@@ -41,6 +41,7 @@ var defaults = {
   name: basename(process.argv[1]),
   json: false,
   src: false,
+  stack: false,
   console: false
 }
 
@@ -206,7 +207,7 @@ Logger.prototype.convert = function(source) {
  *  @see http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
  */
 Logger.prototype.getCallerInfo = function() {
-  var obj = {};
+  var obj = {}, stacktrace = this.conf.stack;
   var limit = Error.stackTraceLimit;
   var prepare = Error.prepareStackTrace;
   Error.captureStackTrace(this, arguments.callee);
@@ -216,10 +217,12 @@ Logger.prototype.getCallerInfo = function() {
     obj.line = caller.getLineNumber();
     var func = caller.getFunctionName();
     if(func) obj.func = func;
-    obj.stack = stack.slice(3);
-    obj.stack.forEach(function(caller, index, arr) {
-      arr[index] = '' + caller;
-    })
+    if(stacktrace) {
+      obj.stack = stack.slice(3);
+      obj.stack.forEach(function(caller, index, arr) {
+        arr[index] = '' + caller;
+      })
+    }
     return stack;
   };
   var stack = this.stack;
