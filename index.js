@@ -60,21 +60,14 @@ var Logger = function(conf, bitwise, parent) {
   conf = conf || {};
   this.bitwise = (bitwise === true);
   this.configure(bitwise);
-  function filter(t, k, v) {
-    if(k !== 'streams') {
-      t[k] = v;
-    }
-  }
+  var cstreams = parent && conf.streams;
   var streams = conf.streams;
   delete conf.streams;
   streams = streams || {
     stream: process.stdout
   }
-  var target = parent ? merge(parent.conf, {}, filter) : merge(defaults, {});
-  //if(parent) delete target.streams;
-  //console.dir(conf);
-  //console.dir(target);
-  this.conf = merge(conf, target, filter);
+  var target = parent ? merge(parent.conf, {}) : merge(defaults, {});
+  this.conf = merge(conf, target);
   conf.streams = streams;
   this.pid = this.conf.pid || process.pid;
   this.hostname = this.conf.hostname || os.hostname();
@@ -90,7 +83,10 @@ var Logger = function(conf, bitwise, parent) {
   }
   this.fields = {};
   this.streams = [];
-  //this.streams = [];
+  if(parent && cstreams) {
+    streams = Array.isArray(streams) ? streams : [streams];
+    streams = streams.concat(conf.streams);
+  }
   this.initialize(streams);
 }
 
@@ -345,15 +341,15 @@ Logger.prototype.getLogRecord = function(level, message) {
  */
 Logger.prototype.write = function(level, record, parameters) {
   var i, target, listeners = this.listeners('write'), json, params;
+  if(!this.conf.console && parameters) {
+    params = parameters.slice(0);
+    params.unshift(record.msg);
+    record.msg = util.format.apply(util, params);
+  }
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
     json = (target.json === true && !listeners.length)
       || (this.conf.json && !listeners.length);
-    if(!this.conf.console && parameters) {
-      params = parameters.slice(0);
-      params.unshift(record.msg);
-      record.msg = util.format.apply(util, params);
-    }
     if(json && (target.type !== RAW)) {
       if(this.bitwise) record.level = this.translate(record.level);
       record = JSON.stringify(record);

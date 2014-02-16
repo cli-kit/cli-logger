@@ -2,11 +2,12 @@ var util = require('util');
 var expect = require('chai').expect;
 var logger = require('../..');
 
-var Component = function(parent, bitwise) {
+var Component = function(parent, bitwise, streams) {
   this.message = 'mock %s message';
   this.name = 'subcomponent';
   var options = {component: this.name};
   if(bitwise) options.level = logger.BW_INFO;
+  if(streams) options.streams = streams;
   this.logger = parent.child(options, bitwise);
 }
 
@@ -45,6 +46,39 @@ describe('cli-logger:', function() {
     })
     child.print();
   });
-  // TODO: assert on appending streams on child
+  it('should append child streams (json)', function(done) {
+    var name = 'mock-child-logger';
+    var conf = {name: name, json: true};
+    var log = logger(conf);
+    var streams = {stream: process.stderr};
+    var child = new Component(log, false, streams);
+    var msg = util.format(child.message, child.name);
+    var written = 0;
+    child.logger.on('write', function(record, stream) {
+      ++written;
+      expect(record).to.be.an('object');
+      expect(record.component).to.eql(child.name);
+      expect(record.msg).to.eql(msg);
+      if(written >= 2) done();
+    })
+    child.print();
+  });
+  it('should append child streams array (json)', function(done) {
+    var name = 'mock-child-logger';
+    var conf = {name: name, json: true};
+    var log = logger(conf);
+    var streams = [{stream: process.stderr}];
+    var child = new Component(log, false, streams);
+    var msg = util.format(child.message, child.name);
+    var written = 0;
+    child.logger.on('write', function(record, stream) {
+      ++written;
+      expect(record).to.be.an('object');
+      expect(record.component).to.eql(child.name);
+      expect(record.msg).to.eql(msg);
+      if(written >= 2) done();
+    })
+    child.print();
+  });
   // TODO: assert on inheriting parent serializers once implemented
 })
