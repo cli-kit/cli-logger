@@ -163,15 +163,14 @@ Logger.prototype.initialize = function() {
  */
 Logger.prototype.append = function(source) {
   var scope = this, bitwise = this.conf.bitwise;
-  var stream = source.stream, level = source.level
-  var name = source.name, json = source.json;
-  //console.log('append level %s', level);
+  var level = source.level, json = source.json, stream = source.stream;
   var lvl = bitwise ? (level === undefined ? this.conf.level : level)
     : level || this.conf.level || this._levels.info;
   var data = {
     stream: stream,
     level: scope.resolve(lvl),
-    name: name
+    name: source.name,
+    type: source.type
   }
   if(typeof json === 'boolean') data.json = json;
   this.streams.push(data);
@@ -211,6 +210,9 @@ Logger.prototype.convert = function(source) {
     && source.stream !== process.stdout
     && source.stream !== process.stderr) {
     throw new Error('Invalid stream specified');
+  }
+  if((source.stream instanceof RingBuffer)) {
+    source.type = RAW;
   }
   this.append(source);
 }
@@ -312,14 +314,14 @@ Logger.prototype.write = function(level, record, parameters) {
   var i, target, listeners = this.listeners('write'), json, params;
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
-    json = target.json === true
-      || (!listeners.length && this.conf.json && target.type !== RAW);
+    json = (target.json === true && !listeners.length)
+      || (this.conf.json && !listeners.length);
     if(!this.conf.console && parameters) {
       params = parameters.slice(0);
       params.unshift(record.msg);
       record.msg = util.format.apply(util, params);
     }
-    if(json) {
+    if(json && (target.type !== RAW)) {
       record = JSON.stringify(record);
     }
     if(this.enabled(level, target.level)) {
@@ -330,7 +332,11 @@ Logger.prototype.write = function(level, record, parameters) {
           this.writers[level].apply(
             console, [record.msg].concat(parameters));
         }else{
-          target.stream.write(record + '\n');
+          if(typeof record === 'string') {
+            target.stream.write(record + '\n');
+          }else{
+            target.stream.write(record);
+          }
         }
       }
     }
@@ -541,8 +547,11 @@ util.inherits(RingBuffer, Writable);
  *  be coerced to a string.
  */
 RingBuffer.prototype.write = function(chunk) {
-  var record = '' + chunk;
-  record = record.replace(/\s+$/, '');
+  var record = chunk;
+  if((chunk instanceof Buffer) || typeof chunk === 'string') {
+    record = '' + chunk;
+    record = record.replace(/\s+$/, '');
+  }
   this.records.unshift(record);
   if(this.records.length > this.limit) {
     this.records.pop();
@@ -572,4 +581,7 @@ for(z in LEVELS) {
 for(z in BITWISE) {
   module.exports['BW_' + z.toUpperCase()] = BITWISE[z];
 }
+module.exports.RAW = RAW;
+module.exports.STREAM = STREAM;
+module.exports.FILE = FILE;
 module.exports.LOG_VERSION = major;

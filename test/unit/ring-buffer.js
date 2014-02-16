@@ -16,6 +16,7 @@ describe('cli-logger:', function() {
     };
     var log = logger(conf);
     expect(log.streams[0].stream).to.eql(ringbuffer);
+    expect(log.streams[0].type).to.eql(logger.RAW);
     expect(ringbuffer.limit).to.eql(16);
     expect(ringbuffer.records).to.eql([]);
     done();
@@ -42,6 +43,10 @@ describe('cli-logger:', function() {
       .to.eql(logger.keys.length)
       .to.eql(ringbuffer.limit);
     log.info('mock %s message', 'info');
+    expect(ringbuffer.records.length)
+      .to.eql(logger.keys.length)
+      .to.eql(ringbuffer.limit);
+    ringbuffer.write(ringbuffer.records[0].msg);
     expect(ringbuffer.records.length)
       .to.eql(logger.keys.length)
       .to.eql(ringbuffer.limit);
