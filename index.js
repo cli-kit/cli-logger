@@ -46,6 +46,33 @@ var defaults = {
 }
 
 /**
+ *  Creates a RingBuffer instance.
+ */
+var RingBuffer = function(options) {
+  Writable.apply(this, arguments);
+  options = options || {};
+  this.limit = options.limit || 16;
+  this.records = [];
+}
+
+util.inherits(RingBuffer, Writable);
+
+/**
+ *  Write to the underlying records array.
+ *
+ *  @param chunk The buffer or string to write, will
+ *  be coerced to a string.
+ */
+RingBuffer.prototype.write = function(chunk) {
+  var record = '' + chunk;
+  record = record.replace(/\s+$/, '');
+  this.records.unshift(record);
+  if(this.records.length > this.limit) {
+    this.records.pop();
+  }
+}
+
+/**
  *  Create a Logger instance.
  *
  *  @param conf The logger configuration.
@@ -518,6 +545,7 @@ module.exports.levels = LEVELS;
 module.exports.bitwise = BITWISE;
 module.exports.keys = keys;
 module.exports.Logger = Logger;
+module.exports.RingBuffer = RingBuffer;
 for(z in LEVELS) {
   module.exports[z.toUpperCase()] = LEVELS[z];
 }
