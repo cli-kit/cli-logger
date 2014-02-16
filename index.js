@@ -42,7 +42,6 @@ var defaults = {
   src: false,
   stack: false,
   console: false,
-  bitwise: false,
   level: null,
   stream: null,
   streams: null
@@ -59,20 +58,25 @@ var defaults = {
 var Logger = function(conf, bitwise, parent) {
   events.EventEmitter.call(this);
   conf = conf || {};
-  conf.bitwise = (bitwise === true);
+  this.bitwise = (bitwise === true);
   this.configure(bitwise);
   function filter(t, k, v) {
     if(k !== 'streams') {
       t[k] = v;
     }
   }
-  this.conf = merge(conf, merge(defaults, {}), filter);
-  this.conf.streams = conf.streams || {
+  var streams = conf.streams;
+  delete conf.streams;
+  streams = streams || {
     stream: process.stdout
   }
+  var target = parent ? merge(parent.conf, {}, filter) : merge(defaults, {});
+  this.conf = merge(conf, target, filter);
+  conf.streams = streams;
   this.pid = this.conf.pid || process.pid;
   this.hostname = this.conf.hostname || os.hostname();
   if(this.conf.console) {
+    // TODO: allow modifying console writers in configuration
     this.writers = {};
     this.writers[LEVELS.trace] = console.log;
     this.writers[LEVELS.debug] = console.log;
@@ -81,7 +85,10 @@ var Logger = function(conf, bitwise, parent) {
     this.writers[LEVELS.error] = console.error;
     this.writers[LEVELS.fatal] = console.error;
   }
-  this.initialize();
+  this.fields = {};
+  //this.streams = parent ? parent.streams.slice(0) : [];
+  this.streams = [];
+  this.initialize(streams);
 }
 
 util.inherits(Logger, events.EventEmitter);
@@ -116,12 +123,12 @@ Logger.prototype.configure = function(bitwise) {
  */
 Logger.prototype.resolve = function(level) {
   var msg = 'Unknown log level \'' + level + '\'';
-  var key, value, z, exists = false, bitwise = this.conf.bitwise;
+  var key, value, z, exists = false;
   if(typeof(level) == 'string') {
     key = level.toLowerCase();
     level = this._levels[key];
   }
-  if(!bitwise) {
+  if(!this.bitwise) {
     for(z in this._levels) {
       if(this._levels[z] === level) {
         exists = true;
@@ -139,9 +146,8 @@ Logger.prototype.resolve = function(level) {
  *
  *  @api private
  */
-Logger.prototype.initialize = function() {
-  this.streams = [];
-  var source = this.conf.streams, i;
+Logger.prototype.initialize = function(source) {
+  var i;
   if(source && typeof(source) == 'object' && !Array.isArray(source)) {
     this.convert(source);
   }else if(Array.isArray(source)) {
@@ -152,7 +158,6 @@ Logger.prototype.initialize = function() {
     throw new Error('Invalid streams configuration');
   }
   // initialize custom data fields
-  this.fields = {};
   for(i in this.conf) {
     if(!defaults.hasOwnProperty(i)) {
       this.fields[i] = this.conf[i];
@@ -168,9 +173,9 @@ Logger.prototype.initialize = function() {
  *  @param source The stream configuration object.
  */
 Logger.prototype.append = function(source) {
-  var scope = this, bitwise = this.conf.bitwise;
+  var scope = this;
   var level = source.level, json = source.json, stream = source.stream;
-  var lvl = bitwise ? (level === undefined ? this.conf.level : level)
+  var lvl = this.bitwise ? (level === undefined ? this.conf.level : level)
     : level || this.conf.level || this._levels.info;
   var data = {
     stream: stream,
@@ -347,7 +352,7 @@ Logger.prototype.write = function(level, record, parameters) {
       record.msg = util.format.apply(util, params);
     }
     if(json && (target.type !== RAW)) {
-      if(this.conf.bitwise) record.level = this.translate(record.level);
+      if(this.bitwise) record.level = this.translate(record.level);
       record = JSON.stringify(record);
     }
     if(this.enabled(level, target.level)) {
@@ -395,7 +400,7 @@ Logger.prototype.log = function(level, message) {
  *  @param source A source log level configured on a stream.
  */
 Logger.prototype.enabled = function(level, source) {
-  var stream, bitwise = this.conf.bitwise, i;
+  var stream, bitwise = this.bitwise, i;
   if(arguments.length === 1) {
     for(i = 0;i < this.streams.length;i++) {
       stream = this.streams[i];
@@ -430,7 +435,7 @@ Logger.prototype.enabled = function(level, source) {
  */
 Logger.prototype.child = function(conf, bitwise) {
   return new Logger(conf,
-    bitwise !== undefined ? bitwise : this.conf.bitwise, this);
+    bitwise !== undefined ? bitwise : this.bitwise, this);
 }
 
 /**
@@ -441,7 +446,7 @@ Logger.prototype.child = function(conf, bitwise) {
  *  @return The lowest log level when no arguments are specified.
  */
 Logger.prototype.level = function(level) {
-  var i, j, stream, min = this._levels.none, bitwise = this.conf.bitwise;
+  var i, j, stream, min = this._levels.none, bitwise = this.bitwise;
   if(!arguments.length) {
     if(!bitwise) {
       for(i = 0;i < this.streams.length;i++) {
