@@ -31,7 +31,8 @@ Normal usage uses log levels that correspond to the [bunyan][bunyan] log levels:
 
 ```javascript
 var log = require('cli-logger');
-logger = log();
+var conf = {level: log.INFO};
+logger = log(conf);
 logger.info('mock %s message', 'info');
 ```
 
@@ -54,6 +55,8 @@ var conf = {level: log.BW_ALL^log.BW_TRACE};
 logger = log(conf, true);
 logger.info('mock %s message', 'info');
 ```
+
+Note that in normal mode you may use string log levels, such as `'trace'`, but in bitwise mode you may only use integer log levels.
 
 ## Streams
 
