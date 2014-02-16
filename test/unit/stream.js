@@ -23,4 +23,20 @@ describe('cli-logger:', function() {
     expect(log.streams[0].stream).to.equal(process.stderr);
     done();
   });
+  it('should configure logger (stream json property)', function(done) {
+    var name = 'mock-stderr-logger';
+    var conf = {name: name, streams: {stream: process.stderr, json: true}};
+    var log = logger(conf);
+    expect(log.streams[0].json).to.eql(true);
+    done();
+  });
+  it('should throw error on unknown stream type', function(done) {
+    var name = 'mock-unknown-type-logger';
+    var conf = {name: name, streams: {stream: process.stderr, type: 'unknown'}};
+    function fn() {
+      var log = logger(conf);
+    }
+    expect(fn).throws(Error);
+    done();
+  });
 })

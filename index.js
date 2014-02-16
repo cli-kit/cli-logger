@@ -37,39 +37,18 @@ var BITWISE = {
 var keys = Object.keys(LEVELS);
 keys.pop();
 
+var types = [
+  RAW,
+  STREAM,
+  FILE
+]
+
 var defaults = {
   name: basename(process.argv[1]),
   json: false,
   src: false,
   stack: false,
   console: false
-}
-
-/**
- *  Creates a RingBuffer instance.
- */
-var RingBuffer = function(options) {
-  Writable.apply(this, arguments);
-  options = options || {};
-  this.limit = options.limit || 16;
-  this.records = [];
-}
-
-util.inherits(RingBuffer, Writable);
-
-/**
- *  Write to the underlying records array.
- *
- *  @param chunk The buffer or string to write, will
- *  be coerced to a string.
- */
-RingBuffer.prototype.write = function(chunk) {
-  var record = '' + chunk;
-  record = record.replace(/\s+$/, '');
-  this.records.unshift(record);
-  if(this.records.length > this.limit) {
-    this.records.pop();
-  }
 }
 
 /**
@@ -179,16 +158,23 @@ Logger.prototype.initialize = function() {
  *  Append a stream.
  *
  *  @api private
+ *
+ *  @param source The stream configuration object.
  */
-Logger.prototype.append = function(stream, level, name) {
+Logger.prototype.append = function(source) {
   var scope = this, bitwise = this.conf.bitwise;
+  var stream = source.stream, level = source.level
+  var name = source.name, json = source.json;
   //console.log('append level %s', level);
   var lvl = bitwise ? (level === undefined ? this.conf.level : level)
     : level || this.conf.level || this._levels.info;
-  this.streams.push({
+  var data = {
     stream: stream,
     level: scope.resolve(lvl),
-    name: name});
+    name: name
+  }
+  if(typeof json === 'boolean') data.json = json;
+  this.streams.push(data);
   stream.on('error', function(e) {
     scope.emit('error', e, stream);
   })
@@ -200,11 +186,13 @@ Logger.prototype.append = function(stream, level, name) {
  *
  *  @api private
  *
- *  @param source The configuration stream object.
+ *  @param source The stream configuration object.
  */
 Logger.prototype.convert = function(source) {
   var stream = source.stream, opts;
+  source.type = source.type || STREAM;
   if(source.path) {
+    source.type = FILE;
     opts = {
       flags: source.flags || 'a',
       mode: source.mode,
@@ -216,12 +204,15 @@ Logger.prototype.convert = function(source) {
       this.emit('error', e);
     }
   }
+  if(!~types.indexOf(source.type)) {
+    throw new Error('Unknown stream type \'' + source.type + '\'');
+  }
   if(source.stream && !(source.stream instanceof Writable)
     && source.stream !== process.stdout
     && source.stream !== process.stderr) {
     throw new Error('Invalid stream specified');
   }
-  this.append(source.stream, source.level, source.name);
+  this.append(source);
 }
 
 /**
@@ -531,6 +522,35 @@ Logger.prototype.fatal = function() {
 }
 
 /**
+ *  Creates a RingBuffer instance.
+ *
+ *  @param options The stream configuration options.
+ */
+var RingBuffer = function(options) {
+  Writable.apply(this, arguments);
+  options = options || {};
+  this.limit = options.limit || 16;
+  this.records = [];
+}
+
+util.inherits(RingBuffer, Writable);
+
+/**
+ *  Write to the underlying records array.
+ *
+ *  @param chunk The buffer or string to write, will
+ *  be coerced to a string.
+ */
+RingBuffer.prototype.write = function(chunk) {
+  var record = '' + chunk;
+  record = record.replace(/\s+$/, '');
+  this.records.unshift(record);
+  if(this.records.length > this.limit) {
+    this.records.pop();
+  }
+}
+
+/**
  *  Create a logger.
  *
  *  @param conf The logger configuration.
@@ -543,6 +563,7 @@ module.exports = function(conf, bitwise) {
 
 module.exports.levels = LEVELS;
 module.exports.bitwise = BITWISE;
+module.exports.types = types;
 module.exports.keys = keys;
 module.exports.Logger = Logger;
 module.exports.RingBuffer = RingBuffer;
