@@ -41,7 +41,11 @@ var defaults = {
   json: false,
   src: false,
   stack: false,
-  console: false
+  console: false,
+  bitwise: false,
+  level: null,
+  stream: null,
+  streams: null
 }
 
 /**
@@ -50,8 +54,10 @@ var defaults = {
  *  @param conf The logger configuration.
  *  @param bitwise A boolean indicating that log levels
  *  should use bitwise operators.
+ *  @param parent A parent logger that owns this logger.
  */
-var Logger = function(conf, bitwise) {
+var Logger = function(conf, bitwise, parent) {
+  events.EventEmitter.call(this);
   conf = conf || {};
   conf.bitwise = (bitwise === true);
   this.configure(bitwise);
@@ -144,6 +150,13 @@ Logger.prototype.initialize = function() {
     }
   }else{
     throw new Error('Invalid streams configuration');
+  }
+  // initialize custom data fields
+  this.fields = {};
+  for(i in this.conf) {
+    if(!defaults.hasOwnProperty(i)) {
+      this.fields[i] = this.conf[i];
+    }
   }
 }
 
@@ -281,6 +294,9 @@ Logger.prototype.getLogRecord = function(level, message) {
   }
   var record = {};
   record.time = new Date().toISOString();
+  for(z in this.fields) {
+    record[z] = this.fields[z];
+  }
   if(obj) {
     for(z in obj) {
       record[z] = obj[z];
@@ -401,6 +417,20 @@ Logger.prototype.enabled = function(level, source) {
     }
   }
   return false;
+}
+
+/**
+ *  Create a child of this logger.
+ *
+ *  @param conf The configuration for the child logger.
+ *  @param bitwise A boolean indicating that log levels
+ *  should use bitwise operators.
+ *
+ *  @return A child Logger instance.
+ */
+Logger.prototype.child = function(conf, bitwise) {
+  return new Logger(conf,
+    bitwise !== undefined ? bitwise : this.conf.bitwise, this);
 }
 
 /**
