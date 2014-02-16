@@ -259,52 +259,42 @@ Logger.prototype.getCallerInfo = function() {
  */
 Logger.prototype.getLogRecord = function(level, message) {
   var parameters = [].slice.call(arguments, 2), args, z;
-  //var raw = parameters.slice(0);
   var err = (message instanceof Error) ? message : null;
   var obj = (!err && message && typeof(message) == 'object') ? message : null;
-  if(parameters.length && !this.conf.console) {
-    if(!err && !obj) {
-      parameters.unshift(message);
-    }
-    message = util.format.apply(util, parameters);
+  if(err || obj) {
+    message = arguments[2] || '';
+    parameters = [].slice.call(arguments, 3);
   }
-  if(err) {
+  if(err && arguments.length == 2) {
+    message = err.message;
+  }
+  var record = {};
+  record.time = new Date().toISOString();
+  if(obj) {
+    for(z in obj) {
+      record[z] = obj[z];
+    }
     if(arguments.length == 2) {
-      message = err.message;
+      message = '';
     }
   }
-  var record = message;
-  if(this.conf.console) {
-    record = {message: message, parameters: parameters};
-  }else if(this.conf.json) {
-    record = {};
-    record.time = new Date().toISOString();
-    if(obj) {
-      for(z in obj) {
-        record[z] = obj[z];
-      }
-      if(arguments.length == 2) {
-        message = '';
-      }
+  record.pid = this.pid;
+  record.hostname = this.hostname;
+  record.name = this.conf.name;
+  record.msg = message;
+  record.level = level;
+  if(err) {
+    record.err = {
+      message: err.message,
+      name: err.name,
+      stack: err.stack
     }
-    record.pid = this.pid;
-    record.hostname = this.hostname;
-    record.name = this.conf.name;
-    record.msg = message;
-    record.level = level;
-    if(err) {
-      record.err = {
-        message: err.message,
-        name: err.name,
-        stack: err.stack
-      }
-    }
-    if(this.conf.src) {
-      record.src = this.getCallerInfo();
-    }
-    record.v = major;
   }
-  return record;
+  if(this.conf.src) {
+    record.src = this.getCallerInfo();
+  }
+  record.v = major;
+  return {record: record, parameters: parameters};
 }
 
 /**
@@ -316,12 +306,20 @@ Logger.prototype.getLogRecord = function(level, message) {
  *
  *  @param level The log level.
  *  @param record The log record.
+ *  @param parameters Message replacement parameters.
  */
-Logger.prototype.write = function(level, record) {
-  var i, target, listeners = this.listeners('write');
+Logger.prototype.write = function(level, record, parameters) {
+  var i, target, listeners = this.listeners('write'), json, params;
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
-    if(!listeners.length && this.conf.json && target.type !== RAW) {
+    json = target.json === true
+      || (!listeners.length && this.conf.json && target.type !== RAW);
+    if(!this.conf.console && parameters) {
+      params = parameters.slice(0);
+      params.unshift(record.msg);
+      record.msg = util.format.apply(util, params);
+    }
+    if(json) {
       record = JSON.stringify(record);
     }
     if(this.enabled(level, target.level)) {
@@ -330,7 +328,7 @@ Logger.prototype.write = function(level, record) {
       }else{
         if(this.conf.console && this.writers[level]) {
           this.writers[level].apply(
-            console, [record.message].concat(record.parameters));
+            console, [record.msg].concat(parameters));
         }else{
           target.stream.write(record + '\n');
         }
@@ -352,7 +350,8 @@ Logger.prototype.write = function(level, record) {
 Logger.prototype.log = function(level, message) {
   if(!level) return false;
   if(level && !message) return this.enabled(level);
-  return this.write(level, this.getLogRecord.apply(this, arguments));
+  var info = this.getLogRecord.apply(this, arguments);
+  return this.write(level, info.record, info.parameters);
 }
 
 /**

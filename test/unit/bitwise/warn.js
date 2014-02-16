@@ -5,10 +5,10 @@ describe('cli-logger:', function() {
   it('should log warn message (bitwise)', function(done) {
     var msg = 'mock warn message';
     var name = 'mock-warn-logger';
-    var conf = {name: name, level: logger.BW_WARN};
+    var conf = {name: name, level: logger.BW_ALL};
     var log = logger(conf, true);
     log.on('write', function(record, stream) {
-      expect(record).to.eql(msg);
+      expect(record.msg).to.eql(msg);
       done();
     })
     expect(log.warn()).to.eql(true);

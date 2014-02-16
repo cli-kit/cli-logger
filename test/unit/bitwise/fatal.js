@@ -8,7 +8,7 @@ describe('cli-logger:', function() {
     var conf = {name: name, level: logger.BW_FATAL};
     var log = logger(conf, true);
     log.on('write', function(record, stream) {
-      expect(record).to.eql(msg);
+      expect(record.msg).to.eql(msg);
       done();
     })
     expect(log.fatal()).to.eql(true);

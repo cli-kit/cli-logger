@@ -1,5 +1,7 @@
 var expect = require('chai').expect;
 var logger = require('../../..');
+process.stdout.setMaxListeners(128);
+process.stderr.setMaxListeners(128);
 
 describe('cli-logger:', function() {
   it('should log debug message (bitwise)', function(done) {
@@ -8,7 +10,7 @@ describe('cli-logger:', function() {
     var conf = {name: name, level: logger.BW_ALL};
     var log = logger(conf, true);
     log.on('write', function(record, stream) {
-      expect(record).to.eql(msg);
+      expect(record.msg).to.eql(msg);
       done();
     })
     expect(log.trace()).to.eql(true);

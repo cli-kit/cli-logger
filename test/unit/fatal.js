@@ -9,7 +9,7 @@ describe('cli-logger:', function() {
     var log = logger(conf);
     expect(log.fatal()).to.eql(true);
     log.on('write', function(record, stream) {
-      expect(record).to.eql(msg);
+      expect(record.msg).to.eql(msg);
       done();
     })
     log.fatal(msg);

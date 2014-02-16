@@ -1,9 +1,6 @@
 var expect = require('chai').expect;
 var logger = require('../..');
 var Logger = require('../..').Logger;
-process.stdout.setMaxListeners(128);
-process.stderr.setMaxListeners(128);
-
 describe('cli-logger:', function() {
   it('should configure logger (defaults)', function(done) {
     var log = logger();
