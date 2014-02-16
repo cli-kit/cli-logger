@@ -27,18 +27,20 @@ Unless [streams](#streams) have been configured all log messages are written to 
 
 ### Normal
 
-Normal usage uses log levels that correspond to the [bunyan][bunyan] log levels:
+Normal mode uses log levels that correspond to the [bunyan][bunyan] log levels and behaviour (log messages are written if they are greater than or equal to the configured log level): 
 
 ```javascript
 var log = require('cli-logger');
-var conf = {level: log.INFO};
+var conf = {level: log.WARN};
 logger = log(conf);
+logger.warn('mock %s message', 'warn');
+// this will not be logged as the log level is warn
 logger.info('mock %s message', 'info');
 ```
 
 ### Bitwise
 
-Using bitwise log levels allows fine-grained control of how log messages are routed:
+Using bitwise log levels allows fine-grained control of how log messages are routed, to enable bitwise mode pass `true` as the second argument when creating the logger:
 
 ```javascript
 var log = require('cli-logger');
@@ -98,6 +100,23 @@ var conf = {streams: [
 var logger = log(conf);
 // ...
 ```
+
+When creating file streams the default flags used is `a` you may specify the `flags` property to change this behaviour:
+
+```javascript
+var log = require('cli-logger');
+var conf = {streams: [
+  {
+    path: 'log/errors.log',
+    flags: 'ax',
+    level: log.ERROR
+  }
+]};
+var logger = log(conf);
+// ...
+```
+
+The `encoding` and `mode` options supported by `fs.createWriteStream` are also respected if present. 
 
 ## License
 
