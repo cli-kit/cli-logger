@@ -110,18 +110,20 @@ Logger.prototype.configure = function(bitwise) {
  */
 Logger.prototype.resolve = function(level) {
   var msg = 'Unknown log level \'' + level + '\'';
-  var key, value, z, exists = false;
+  var key, value, z, exists = false, bitwise = this.conf.bitwise;
   if(typeof(level) == 'string') {
     key = level.toLowerCase();
     level = this._levels[key];
   }
-  for(z in this._levels) {
-    if(this._levels[z] === level) {
-      exists = true;
-      break;
+  if(!bitwise) {
+    for(z in this._levels) {
+      if(this._levels[z] === level) {
+        exists = true;
+        break;
+      }
     }
+    if(level === undefined || !exists) throw new Error(msg);
   }
-  if(level === undefined || !exists) throw new Error(msg);
   return level;
 }
 
@@ -151,8 +153,10 @@ Logger.prototype.initialize = function() {
  *  @api private
  */
 Logger.prototype.append = function(stream, level, name) {
-  var scope = this;
-  var lvl = level || this.conf.level || this._levels.info;
+  var scope = this, bitwise = this.conf.bitwise;
+  //console.log('append level %s', level);
+  var lvl = bitwise ? (level === undefined ? this.conf.level : level)
+    : level || this.conf.level || this._levels.info;
   this.streams.push({
     stream: stream,
     level: scope.resolve(lvl),
@@ -356,16 +360,40 @@ Logger.prototype.enabled = function(level) {
  *  @return The lowest log level when no arguments are specified.
  */
 Logger.prototype.level = function(level) {
-  var i, stream, min;
+  var i, j, stream, min = this._levels.none, bitwise = this.conf.bitwise;
   if(!arguments.length) {
-    min = this._levels.none;
-    for(i = 0;i < this.streams.length;i++) {
-      stream = this.streams[i];
-      min = Math.min(min, stream.level);
+    if(!bitwise) {
+      //min = this._levels.none;
+      for(i = 0;i < this.streams.length;i++) {
+        stream = this.streams[i];
+        min = Math.min(min, stream.level);
+      }
+    }else{
+      min = Number.MAX_VALUE;
+      var keys = Object.keys(BITWISE);
+      var none = keys.shift();
+      var zero = BITWISE[none], value;
+      for(i = 0;i < this.streams.length;i++) {
+        stream = this.streams[i];
+        //console.dir('stream.level: ' + stream.level);
+        if(stream.level === zero) return zero;
+        for(j = 0;j < keys.length;j++) {
+          value = BITWISE[keys[j]];
+          if((stream.level&value) === value) {
+            //console.dir(keys[j]);
+            //console.dir(value);
+            min = Math.min(min, value);
+          }
+        }
+      }
     }
+    //console.dir(min);
     return min;
   }else{
-    level = this.resolve(level);
+    if(bitwise && typeof(level) !== 'number') {
+      throw new Error('Value for bitwise levels must be a number');
+    }
+    level = bitwise ? level : this.resolve(level);
     for(i = 0;i < this.streams.length;i++) {
       stream = this.streams[i];
       stream.level = level;
