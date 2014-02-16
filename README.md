@@ -62,10 +62,11 @@ Note that in normal mode you may use string log levels, such as `'trace'`, but i
 
 * `name`: The name of the logger, default is `basename(process.argv[1])`.
 * `json`: Print log records as newline delimited JSON, default is `false`.
+* `level`: A default log level to use when a stream does not explicitly specify a log level, default is `INFO`.
 * `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`.
 * `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`.
 * `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`.
-* `streams`: An array or object that configures the streams log records are written to, by default if this property is not present a single stream is configured for `process.stdout`.
+* `streams`: An array or object that configures the streams that log records are written to, by default if this property is not present a single stream is configured for `process.stdout`.
 
 ## Streams
 
