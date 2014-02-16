@@ -404,7 +404,6 @@ Logger.prototype.level = function(level) {
   var i, j, stream, min = this._levels.none, bitwise = this.conf.bitwise;
   if(!arguments.length) {
     if(!bitwise) {
-      //min = this._levels.none;
       for(i = 0;i < this.streams.length;i++) {
         stream = this.streams[i];
         min = Math.min(min, stream.level);
@@ -416,19 +415,15 @@ Logger.prototype.level = function(level) {
       var zero = BITWISE[none], value;
       for(i = 0;i < this.streams.length;i++) {
         stream = this.streams[i];
-        //console.dir('stream.level: ' + stream.level);
         if(stream.level === zero) return zero;
         for(j = 0;j < keys.length;j++) {
           value = BITWISE[keys[j]];
           if((stream.level&value) === value) {
-            //console.dir(keys[j]);
-            //console.dir(value);
             min = Math.min(min, value);
           }
         }
       }
     }
-    //console.dir(min);
     return min;
   }else{
     if(bitwise && typeof(level) !== 'number') {
@@ -438,6 +433,40 @@ Logger.prototype.level = function(level) {
     for(i = 0;i < this.streams.length;i++) {
       stream = this.streams[i];
       stream.level = level;
+    }
+  }
+}
+
+/**
+ *  Get or set the current log level for streams.
+ *
+ *  @param name The stream integer index or name.
+ *  @param level The new level for the stream(s).
+ */
+Logger.prototype.levels = function(name, level) {
+  var stream, i, levels;
+  if(!arguments.length) {
+    levels = [];
+    this.streams.forEach(function(stream) {
+      levels.push(stream.level);
+    })
+    return levels;
+  }else{
+    if(typeof name == 'number') {
+      stream = this.streams[name];
+    }else{
+      for(i = 0;i < this.streams.length;i++) {
+        if(this.streams[i].name === name) {
+          stream = this.streams[i];
+          break;
+        }
+      }
+    }
+    if(!stream) throw new Error('No stream found matching \'' + name + '\'');
+    if(arguments.length === 1) {
+      return stream.level;
+    }else{
+      stream.level = this.resolve(level);
     }
   }
 }
