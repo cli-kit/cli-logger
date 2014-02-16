@@ -6,6 +6,7 @@
  *  ./bin/color
  *  ./bin/color > log/color.log 2>&1 && cat log/color.log
  */
+
 require('ttycolor')().defaults();
 var log = require('..');
 var logger = log({console: true, level: log.TRACE});
