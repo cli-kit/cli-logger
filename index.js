@@ -460,6 +460,37 @@ Logger.prototype.enabled = function(level, source) {
 }
 
 /**
+ *  Retrieve the string name(s) for a log level.
+ *
+ *  @param level The log level integer.
+ *  @param complex A boolean indicating the level
+ *  is a complex bitwise level (combination).
+ *
+ *  @return A string name for the level or an array
+ *  of names if the complex flag is specified, if names
+ *  could not be determined for the level the level is returned.
+ */
+Logger.prototype.names = function(level, complex) {
+  var z, names = [], i, value;
+  if(!complex) {
+    for(z in LEVELS) {
+      if(LEVELS[z] === level) return z;
+    }
+    for(z in BITWISE) {
+      if(BITWISE[z] === level) return z;
+    }
+  }else{
+    for(i = 0;i < keys.length;i++) {
+      z = keys[i];
+      value = BITWISE[z];
+      if((level&value) === value) names.push(z);
+    }
+    return names;
+  }
+  return level;
+}
+
+/**
  *  Create a child of this logger.
  *
  *  @param conf The configuration for the child logger.
