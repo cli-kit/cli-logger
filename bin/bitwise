@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+/**
+ *  Example for testing bitwise mode output.
+ *
+ *  This example demonstrates that log messages are *not* duplicated across
+ *  streams by being more specific about how messages are logged, see
+ *  normal(1) for the inverse behaviour.
+ *
+ *  ./bin/bitwise
+ *  ./bin/bitwise 1> log/bitwise.out.log 2> log/bitwise.err.log \
+ *    && cat log/bitwise.out.log log/bitwise.err.log
+ */
+var log = require('..');
+var conf = {
+  streams: [
+    {
+      stream: process.stdout,
+      level: log.BW_TRACE|log.BW_DEBUG|log.BW_INFO
+    },
+    {
+      stream: process.stderr,
+      level: log.BW_ALL^log.BW_TRACE^log.BW_DEBUG^log.BW_INFO
+    }
+  ]
+}
+var logger = log(conf, true);
+log.keys.forEach(function(key) {
+  logger[key]('mock %s message', key);
+})
