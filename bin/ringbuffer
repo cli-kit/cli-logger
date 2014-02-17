@@ -4,9 +4,8 @@
  *  Example of using a ring buffer to stash log records
  *  and subsequently flush to a file.
  *
- *  ./bin/ringbuffer
- *  ./bin/ringbuffer --json
  *  ./bin/ringbuffer && cat log/ringbuffer.log
+ *  ./bin/ringbuffer --json && cat log/ringbuffer.log
  */
 var log = require('..');
 var ringbuffer = new log.RingBuffer(
