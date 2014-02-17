@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+/**
+ *  Example of using a ring buffer to stash log records
+ *  and subsequently flush to a file.
+ *
+ *  ./bin/ringbuffer
+ *  ./bin/ringbuffer --json
+ *  ./bin/ringbuffer && cat log/ringbuffer.log
+ */
+var log = require('..');
+var ringbuffer = new log.RingBuffer(
+  {limit: log.keys.length, json: process.argv[2] === '--json'});
+var conf = {
+  streams: [
+    {
+      stream: ringbuffer,
+      level: log.TRACE
+    }
+  ]
+};
+var logger = log(conf);
+log.keys.forEach(function(key) {
+  logger[key]('mock %s message', key);
+})
+ringbuffer.flush('log/ringbuffer.log');

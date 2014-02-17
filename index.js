@@ -286,6 +286,7 @@ Logger.prototype.translate = function(level) {
       return LEVELS[keys[i]];
     }
   }
+  return level;
 }
 
 /**
