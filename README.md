@@ -64,17 +64,29 @@ logger.info('mock %s message', 'info');
 
 Note that in normal mode you may use string log levels, such as `'trace'`, but in bitwise mode you may only use integer log levels.
 
+## Messages
+
+Logging messages is consistent with [bunyan][bunyan]:
+
+```javascript
+log.info('info message')                        // log a simple message
+log.warn('%s message', 'warn')                  // log a message with parameters
+log.debug({foo: 'bar'}, '%s message', 'debug')  // add field(s) to the log record
+log.error(err)                                  // log an Error instance
+log.fatal(err, '%s error', 'fatal')             // log an Error with custom message
+```
+
 ## Log Levels
 
 The log levels correspond to a method on the logger, the methods and corresponding module constants are shown below:
 
 ```javascript
-logger.trace()          // TRACE: 10 | BW_TRACE: 1
-logger.debug()          // DEBUG: 20 | BW_DEBUG: 2
-logger.info()           // INFO: 30  | BW_INFO: 4
-logger.warn()           // WARN: 40  | BW_WARN: 8
-logger.error()          // ERROR: 50 | BW_ERROR: 16
-logger.fatal()          // FATAL: 60 | BW_FATAL: 32
+log.trace()          // TRACE: 10 | BW_TRACE: 1
+log.debug()          // DEBUG: 20 | BW_DEBUG: 2
+log.info()           // INFO: 30  | BW_INFO: 4
+log.warn()           // WARN: 40  | BW_WARN: 8
+log.error()          // ERROR: 50 | BW_ERROR: 16
+log.fatal()          // FATAL: 60 | BW_FATAL: 32
 ```
 
 In normal mode the additional constant `NONE` (70) may be used to disable logging. In bitwise mode you may also use `BW_NONE` (0) and `BW_ALL` (63), `BW_ALL` is particularly useful for `XOR` operations.
@@ -82,18 +94,18 @@ In normal mode the additional constant `NONE` (70) may be used to disable loggin
 The API for getting and setting log levels is consistent with [bunyan][bunyan]:
 
 ```javascript
-logger.info()               // true if any stream is enabled for the info level
-logger.level()              // get a level integer (lowest level of all streams)
-logger.level(INFO)          // sets all streams to the INFO level
-logger.level('info')        // sets all streams to the INFO level (normal only)
-logger.level(BW_INFO)       // sets all streams to the INFO level (bitwise only)
-logger.levels()             // gets an array of the levels of all streams
-logger.levels(0)            // get level of stream at index zero
-logger.levels('foo')        // get level of the stream named 'foo'
-logger.levels(0, INFO)      // set level of stream at index zero to INFO
-logger.levels(0, 'info')    // set level of stream at index zero to INFO (normal only)
-logger.levels(0, BW_INFO)   // set level of stream at index zero to INFO (bitwise only)
-logger.levels('foo', WARN)  // set level of stream named 'foo' to WARN
+log.info()               // true if any stream is enabled for the info level
+log.level()              // get a level integer (lowest level of all streams)
+log.level(INFO)          // sets all streams to the INFO level
+log.level('info')        // sets all streams to the INFO level (normal only)
+log.level(BW_INFO)       // sets all streams to the INFO level (bitwise only)
+log.levels()             // gets an array of the levels of all streams
+log.levels(0)            // get level of stream at index zero
+log.levels('foo')        // get level of the stream named 'foo'
+log.levels(0, INFO)      // set level of stream at index zero to INFO
+log.levels(0, 'info')    // set level of stream at index zero to INFO (normal only)
+log.levels(0, BW_INFO)   // set level of stream at index zero to INFO (bitwise only)
+log.levels('foo', WARN)  // set level of stream named 'foo' to WARN
 ```
 
 ## Configuration
