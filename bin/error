@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+/**
+ *  Example of logging an error message.
+ *
+ *  ./bin/error
+ *  ./bin/error | ./bunyan
+ */
+var log = require('..');
+var logger = log({json: true});
+var err = new Error('mock error message');
+logger.error(err);
+logger.fatal(err, '%s error', 'fatal');

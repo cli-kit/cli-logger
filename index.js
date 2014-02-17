@@ -328,11 +328,7 @@ Logger.prototype.getLogRecord = function(level, message) {
   record.msg = message;
   record.level = level;
   if(err) {
-    record.err = {
-      message: err.message,
-      name: err.name,
-      stack: err.stack
-    }
+    record.err = serializers.err.call(this, err);
   }
   if(this.conf.src) {
     record.src = this.getCallerInfo();
