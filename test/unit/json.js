@@ -39,4 +39,24 @@ describe('cli-logger:', function() {
       log.info(msg);
     }
   );
+  it('should log info message (json stringify circular reference)',
+    function(done) {
+      var msg = 'mock json info message';
+      var name = 'mock-json-logger';
+      var conf = {name: name, streams: {stream: process.stderr, json: true}};
+      var log = logger(conf);
+      var a = {};
+      var b = {a: a}
+      a.b = b;
+      var obj = {a: a};
+      process.stderr.write = function(message) {
+        var str = message.trim();
+        var record = JSON.parse(str);
+        expect(record.msg).to.eql(msg);
+        expect(record.a.b.a).to.eql('[Circular]');
+        done();
+      }
+      log.info(obj, msg);
+    }
+  );
 })
