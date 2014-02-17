@@ -650,6 +650,16 @@ Logger.prototype.fatal = function() {
 var RingBuffer = require('./lib/ring-buffer');
 var serializers = require('./lib/serializers');
 
+/**
+ *  Create a Logger and set json configuration
+ *  to true if it has not been defined.
+ *
+ *  Defined for bunyan compatibility.
+ *
+ *  @param conf The logger configuration.
+ *  @param bitwise A boolean indicating that log levels
+ *  should use bitwise operators.
+ */
 function createLogger(conf, bitwise) {
   conf = conf || {};
   if(conf.json === undefined) conf.json = true;
