@@ -110,17 +110,17 @@ log.levels('foo', WARN)  // set level of stream named 'foo' to WARN
 
 ## Configuration
 
-* `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`.
-* `json`: Print log records as newline delimited JSON, default is `false`.
-* `level`: A default log level to use when a stream does not explicitly specify a log level, default is `INFO`.
-* `name`: The name of the logger, default is `basename(process.argv[1])`.
-* `prefix`: A function used to prepend a prefix to log messages, default is `null`.
+* `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`, see [console](#console).
+* `json`: Print log records as newline delimited JSON, default is `false`, see [json](#json).
+* `level`: A default log level to use when a stream does not explicitly specify a log level, default is `INFO`, see [level](#level).
+* `name`: The name of the logger, default is `basename(process.argv[1])`, see [name](#name).
+* `prefix`: A function used to prepend a prefix to log messages, default is `null`, see [prefix](#prefix).
 * `serializers`: Map of log record property names to serialization functions,
   default is `null`.
 * `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`.
 * `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`.
 * `stream`: Shortcut for specifying a stream for single stream loggers, default is `null`, see [streams](#streams).
-* `streams`: An array or object that configures the streams that log records are written to, by default if this property is not present a single stream is configured for `process.stdout`.
+* `streams`: An array or object that configures the streams that log records are written to, by default if this property is not present a single stream is configured for `process.stdout`, see [streams](#streams).
 * `writers`: Map of log level string names to console functions, default is
   `null`. Use this to customize the functions used when `console` is `true`,
   see [writers](#writers).
@@ -179,6 +179,24 @@ var logger = require('cli-logger');
 log = logger.createLogger();
 // ...
 ```
+
+### Level
+
+The `level` configuration option sets the default log level when a level is not specified on a stream, it may also be used in conjunction with `stream` to configure a single stream, see [streams](#streams) for an example.
+
+### Name
+
+All loggers must have a `name` specified, typically this will be the name of the program so it is determined automatically, however you can override with a different `name` if required. Note that when specified this option must be a non-zero length string or an error will be thrown.
+
+### Prefix
+
+Sometimes it may be useful to prefix all log messages, possibly the program name, log level or date. Specify a function as the `prefix` configuration option to set a prefix for all log messages. The function has the signature:
+
+```javascript
+function prefix(record)
+```
+
+And is invoked in the scope of the `Logger` instance so you may access `this.name`, `this.conf` etc. See the [prefix][prefix] example program.
 
 ### Streams
 
@@ -248,3 +266,4 @@ Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license
 [test suite]: https://github.com/freeformsystems/cli-logger/tree/master/test/unit
 
 [color]: https://github.com/freeformsystems/cli-logger/tree/master/bin/color
+[prefix]: https://github.com/freeformsystems/cli-logger/tree/master/bin/prefix
