@@ -116,7 +116,7 @@ log.levels('foo', WARN)  // set level of stream named 'foo' to WARN
 * `name`: The name of the logger, default is `basename(process.argv[1])`, see [name](#name).
 * `prefix`: A function used to prepend a prefix to log messages, default is `null`, see [prefix](#prefix).
 * `serializers`: Map of log record property names to serialization functions,
-  default is `null`.
+  default is `null`, see [serializers](#serializers).
 * `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`.
 * `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`.
 * `stream`: Shortcut for specifying a stream for single stream loggers, default is `null`, see [streams](#streams).
@@ -200,6 +200,43 @@ It should return a string to prepend to all log messages.
 
 The `prefix` function is invoked in the scope of the `Logger` instance so you may access `this.name`, `this.names()` etc. See the [prefix][prefix] example program.
 
+### Serializers
+
+Serializers behave the same as [bunyan][bunyan] and the same standard serializers are provided via the `serializers` module property (also aliased via `stdSerializers` for [bunyan][bunyan] compatibility).
+
+* `req`: Serialize an HTTP request.
+* `res`: Serialize an HTTP response.
+* `err`: Serialize an Error instance.
+
+```javascript
+var logger = require('cli-logger');
+var conf = {serializers: {err: logger.serializers.err}};
+var log = logger(conf);
+log.on('write', function(record, stream, msg, parameters) {
+  console.log(JSON.stringify(record, undefined, 2));
+})
+log.info({err: new Error('Mock simple error')});
+```
+
+```json
+{
+  "time": "2014-02-17T15:54:52.830Z",
+  "err": {
+    "message": "Mock simple error",
+    "name": "Error",
+    "stack": "..."
+  },
+  "pid": 65543,
+  "hostname": "pearl.local",
+  "name": "write",
+  "msg": "",
+  "level": 30,
+  "v": 0
+}
+```
+
+See the [serialize][serialize] example program.
+
 ### Streams
 
 Configuring output streams is typically done using an array, but as a convenience an object may be specified to configure a single output stream:
@@ -269,3 +306,4 @@ Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license
 
 [color]: https://github.com/freeformsystems/cli-logger/tree/master/bin/color
 [prefix]: https://github.com/freeformsystems/cli-logger/tree/master/bin/prefix
+[serialize]: https://github.com/freeformsystems/cli-logger/tree/master/bin/serialize

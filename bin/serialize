@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+
+/**
+ *  Example of using a serializer and listening for the write event.
+ *
+ *  ./bin/write
+ */
+
+var logger = require('..');
+var conf = {serializers: {err: logger.serializers.err}};
+var log = logger(conf);
+log.on('write', function(record, stream, msg, parameters) {
+  console.log(JSON.stringify(record, undefined, 2));
+})
+log.info({err: new Error('Mock simple error')});
