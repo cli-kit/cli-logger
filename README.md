@@ -21,6 +21,10 @@ npm test
 * Bitwise log level support
 * 100% code coverage
 
+## Examples
+
+Example programs are in the [bin][bin] directory and there are many usage examples in the [test suite][test suite].
+
 ## Usage
 
 Unless [streams](#streams) have been configured all log messages are written to `process.stdout`.
@@ -131,3 +135,6 @@ Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license
 
 [ttycolor]: https://github.com/freeformsystems/ttycolor
 [bunyan]: https://github.com/trentm/node-bunyan
+
+[bin]: https://github.com/freeformsystems/cli-logger/tree/master/bin
+[test suite]: https://github.com/freeformsystems/cli-logger/tree/master/test/unit
