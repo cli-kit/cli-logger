@@ -142,8 +142,6 @@ error   // => console.error
 fatal   // => console.error
 ```
 
-If required you could define your own function that has the same signature as a `console` method (`function(message, ...)`) to create different output styles using the [ttycolor][ttycolor] module methods.
-
 Run the [color][color] example program to see the default output.
 
 ### Writers
@@ -165,6 +163,10 @@ var conf = {
   }
 }
 ```
+
+If required you could define your own function that has the same signature as a `console` method (`function(message, ...)`) to create different output styles using the [ttycolor][ttycolor] module methods.
+
+This configuration option should only be used in conjunction with the `console` option.
 
 ### JSON
 
