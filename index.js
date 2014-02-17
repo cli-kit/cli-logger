@@ -378,23 +378,25 @@ Logger.prototype.write = function(level, record, parameters) {
     params.unshift(record.msg);
     record.msg = util.format.apply(util, params);
   }
+  var events = {};
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
     json = (target.json === true) || this.conf.json;
     if(json && !listeners.length && (target.type !== RAW)) {
       if(this.bitwise) record.level = this.translate(record.level);
-      record = JSON.stringify(record, circular());
+      json = JSON.stringify(record, circular());
     }
     if(this.enabled(level, target.level)) {
       if(listeners.length) {
         this.emit('write', record, target.stream, msg, parameters);
       }else{
+        events[this.names(level)] = record;
         if(this.conf.console && this.writers[level]) {
           this.writers[level].apply(
             console, [record.msg].concat(parameters));
         }else{
-          if(typeof record === 'string') {
-            target.stream.write(record + '\n');
+          if(typeof json === 'string') {
+            target.stream.write(json + '\n');
           }else if(target.type === RAW){
             target.stream.write(record);
           }else{
@@ -403,6 +405,10 @@ Logger.prototype.write = function(level, record, parameters) {
         }
       }
     }
+  }
+  // dispatch level specific events
+  for(var z in events) {
+    this.emit('flush', record, z, msg, parameters);
   }
   return (listeners.length === 0);
 }
