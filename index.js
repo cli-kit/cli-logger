@@ -375,6 +375,7 @@ Logger.prototype.serialize = function(k, v) {
  */
 Logger.prototype.write = function(level, record, parameters) {
   var i, target, listeners = this.listeners('write'), json, params;
+  var msg = '' + record.msg;
   if(!this.conf.console && parameters) {
     params = parameters.slice(0);
     params.unshift(record.msg);
@@ -390,7 +391,7 @@ Logger.prototype.write = function(level, record, parameters) {
     }
     if(this.enabled(level, target.level)) {
       if(listeners.length) {
-        this.emit('write', record, target.stream);
+        this.emit('write', record, target.stream, msg, parameters);
       }else{
         if(this.conf.console && this.writers[level]) {
           this.writers[level].apply(
