@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+/**
+ *  Example of listening for the log event to perform an
+ *  an action when a log record has been written of a particular
+ *  level.
+ *
+ *  ./bin/event
+ *  ./bin/event; echo $?;
+ */
+var log = require('..');
+var conf = {
+  streams: [
+    {
+      stream: process.stdout,
+      level: log.BW_TRACE|log.BW_DEBUG|log.BW_INFO
+    },
+    {
+      stream: process.stderr,
+      level: log.BW_ALL^log.BW_TRACE^log.BW_DEBUG^log.BW_INFO
+    }
+  ]
+}
+var logger = log(conf, true);
+logger.on('log', function(record, level, msg, parameters) {
+  if(level === this.FATAL) {
+    process.exit(128);
+  }
+})
+log.keys.forEach(function(key) {
+  logger[key]('mock %s message', key);
+})

@@ -371,14 +371,13 @@ Logger.prototype.serialize = function(k, v) {
  *  @param parameters Message replacement parameters.
  */
 Logger.prototype.write = function(level, record, parameters) {
-  var i, target, listeners = this.listeners('write'), json, params;
+  var i, target, listeners = this.listeners('write'), json, params, event;
   var msg = '' + record.msg;
   if(!this.conf.console && parameters) {
     params = parameters.slice(0);
     params.unshift(record.msg);
     record.msg = util.format.apply(util, params);
   }
-  var events = {};
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
     json = (target.json === true) || this.conf.json;
@@ -390,7 +389,7 @@ Logger.prototype.write = function(level, record, parameters) {
       if(listeners.length) {
         this.emit('write', record, target.stream, msg, parameters);
       }else{
-        events[this.names(level)] = record;
+        event = record;
         if(this.conf.console && this.writers[level]) {
           this.writers[level].apply(
             console, [record.msg].concat(parameters));
@@ -406,9 +405,8 @@ Logger.prototype.write = function(level, record, parameters) {
       }
     }
   }
-  // dispatch level specific events
-  for(var z in events) {
-    this.emit('flush', record, z, msg, parameters);
+  if(event) {
+    this.emit('log', record, record.level, msg, parameters);
   }
   return (listeners.length === 0);
 }
