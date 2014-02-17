@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+/**
+ *  Example of retrieving source file, line number, function name
+ *  and stack information.
+ *
+ *  ./bin/source
+ */
+var logger = require('..');
+var conf = {src: true, stack: true};
+var log = logger(conf);
+log.on('write', function(record, stream, msg, parameters) {
+  console.log(JSON.stringify(record, undefined, 2));
+})
+function info() {
+  log.info('mock %s message', 'info');
+}
+info();

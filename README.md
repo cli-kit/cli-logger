@@ -117,8 +117,8 @@ log.levels('foo', WARN)  // set level of stream named 'foo' to WARN
 * `prefix`: A function used to prepend a prefix to log messages, default is `null`, see [prefix](#prefix).
 * `serializers`: Map of log record property names to serialization functions,
   default is `null`, see [serializers](#serializers).
-* `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`.
-* `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`.
+* `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`, see [source](#source).
+* `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`, see [source](#source).
 * `stream`: Shortcut for specifying a stream for single stream loggers, default is `null`, see [streams](#streams).
 * `streams`: An array or object that configures the streams that log records are written to, by default if this property is not present a single stream is configured for `process.stdout`, see [streams](#streams).
 * `writers`: Map of log level string names to console functions, default is
@@ -199,6 +199,53 @@ function prefix(record)
 It should return a string to prepend to all log messages.
 
 The `prefix` function is invoked in the scope of the `Logger` instance so you may access `this.name`, `this.names()` etc. See the [prefix][prefix] example program.
+
+### Source
+
+Set the `src` configuration property when you want information about the file name, line number and function name that invoked a log method, you may also set the `stack` property to include a full stack trace.
+
+***Caution: do not use this in production, retrieving call site information is slow.***
+
+```javascript
+var logger = require('cli-logger');
+var conf = {src: true, stack: true};
+var log = logger(conf);
+log.on('write', function(record, stream, msg, parameters) {
+  console.log(JSON.stringify(record, undefined, 2));
+})
+function info() {
+  log.info('mock %s message', 'info');
+}
+info();
+```
+
+```json
+{
+  "time": "2014-02-17T16:28:02.573Z",
+  "pid": 2747,
+  "hostname": "pearl.local",
+  "name": "source",
+  "msg": "mock info message",
+  "level": 30,
+  "src": {
+    "file": "/Users/cyberfunk/git/cli/logger/bin/source",
+    "line": 16,
+    "func": "info",
+    "stack": [
+      "info (/Users/cyberfunk/git/cli/logger/bin/source:16:7)",
+      "Object.<anonymous> (/Users/cyberfunk/git/cli/logger/bin/source:18:1)",
+      "Module._compile (module.js:456:26)",
+      "Object.Module._extensions..js (module.js:474:10)",
+      "Module.load (module.js:356:32)",
+      "Function.Module._load (module.js:312:12)",
+      "Function.Module.runMain (module.js:497:10)"
+    ]
+  },
+  "v": 0
+}
+```
+
+See the [source][source] example program.
 
 ### Serializers
 
@@ -307,3 +354,4 @@ Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license
 [color]: https://github.com/freeformsystems/cli-logger/tree/master/bin/color
 [prefix]: https://github.com/freeformsystems/cli-logger/tree/master/bin/prefix
 [serialize]: https://github.com/freeformsystems/cli-logger/tree/master/bin/serialize
+[source]: https://github.com/freeformsystems/cli-logger/tree/master/bin/source

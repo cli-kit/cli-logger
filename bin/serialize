@@ -3,9 +3,8 @@
 /**
  *  Example of using a serializer and listening for the write event.
  *
- *  ./bin/write
+ *  ./bin/serialize
  */
-
 var logger = require('..');
 var conf = {serializers: {err: logger.serializers.err}};
 var log = logger(conf);
