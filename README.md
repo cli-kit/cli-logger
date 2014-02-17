@@ -190,13 +190,15 @@ All loggers must have a `name` specified, typically this will be the name of the
 
 ### Prefix
 
-Sometimes it may be useful to prefix all log messages, possibly the program name, log level or date. Specify a function as the `prefix` configuration option to set a prefix for all log messages. The function has the signature:
+Sometimes it may be useful to prefix all log messages, possibly with the program name, log level or date. Specify a function as the `prefix` configuration option to set a prefix for all log messages. The function has the signature:
 
 ```javascript
 function prefix(record)
 ```
 
-And is invoked in the scope of the `Logger` instance so you may access `this.name`, `this.conf` etc. See the [prefix][prefix] example program.
+It should return a string to prepend to all log messages.
+
+The `prefix` function is invoked in the scope of the `Logger` instance so you may access `this.name`, `this.names()` etc. See the [prefix][prefix] example program.
 
 ### Streams
 
