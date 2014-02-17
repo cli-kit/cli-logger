@@ -43,6 +43,7 @@ var defaults = {
   stack: false,
   console: false,
   serializers: null,
+  prefix: null,
   writers: null,
   level: null,
   stream: null,
@@ -377,6 +378,9 @@ Logger.prototype.write = function(level, record, parameters) {
     params = parameters.slice(0);
     params.unshift(record.msg);
     record.msg = util.format.apply(util, params);
+  }
+  if(typeof this.conf.prefix === 'function') {
+    record.msg = this.conf.prefix.apply(this, [record]) + record.msg;
   }
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
