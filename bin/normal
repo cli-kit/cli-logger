@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+
+/**
+ *  Example for testing normal mode output.
+ *
+ *  This example demonstrates that log messages are duplicated across
+ *  streams for certain levels due to the greater than or equal logic
+ *  in normal mode.
+ *
+ *  If this is not desirable you can enable bitwise mode for finer
+ *  control of log record output.
+ *
+ *  ./bin/normal
+ *  ./bin/normal 1> log/normal.out.log 2> log/normal.err.log \
+ *    && cat log/normal.out.log log/normal.err.log
+ */
+var log = require('..');
+var conf = {
+  streams: [
+    {
+      stream: process.stdout,
+      level: log.TRACE
+    },
+    {
+      stream: process.stderr,
+      level: log.WARN
+    }
+  ]
+}
+var logger = log(conf);
+log.keys.forEach(function(key) {
+  logger[key]('mock %s message', key);
+})

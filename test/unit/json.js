@@ -28,8 +28,23 @@ describe('cli-logger:', function() {
     function(done) {
       var msg = 'mock json info message';
       var name = 'mock-json-logger';
-      var conf = {name: name, streams: {stream: process.stderr, json: true}};
-      var log = logger(conf);
+      var conf = {name: name, streams: {stream: process.stderr}};
+      var log = logger.createLogger(conf);
+      process.stderr.write = function(message) {
+        var str = message.trim();
+        var record = JSON.parse(str);
+        expect(record.msg).to.eql(msg);
+        done();
+      }
+      log.info(msg);
+    }
+  );
+  it('should log info message (json stream stringify code path)',
+    function(done) {
+      var msg = 'mock json info message';
+      var name = 'mock-json-logger';
+      var conf = {name: name, streams: {stream: process.stderr}, json: true};
+      var log = logger.createLogger(conf);
       process.stderr.write = function(message) {
         var str = message.trim();
         var record = JSON.parse(str);

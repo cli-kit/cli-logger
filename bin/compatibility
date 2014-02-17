@@ -5,7 +5,7 @@
  *
  *  Note this example configures the logger to use
  *  bitwise mode to verify the bitwise log levels are
- *  converted to bunyan compatible log levels when
+ *  translated to bunyan compatible log levels when
  *  converting the log record to JSON.
  *
  *  ./bin/compatibility

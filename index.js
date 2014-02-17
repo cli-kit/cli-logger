@@ -166,7 +166,6 @@ Logger.prototype.resolve = function(level) {
   return level;
 }
 
-
 /**
  *  Initialize the output streams.
  *
@@ -411,8 +410,10 @@ Logger.prototype.write = function(level, record, parameters) {
         }else{
           if(typeof record === 'string') {
             target.stream.write(record + '\n');
-          }else{
+          }else if(target.type === RAW){
             target.stream.write(record);
+          }else{
+            target.stream.write(record.msg + '\n');
           }
         }
       }
