@@ -63,7 +63,7 @@ var Logger = function(conf, bitwise, parent) {
   events.EventEmitter.call(this);
   conf = conf || {};
   this.bitwise = (bitwise === true);
-  this.configure(bitwise);
+  this.configure();
   var cstreams = parent && conf.streams;
   var streams = conf.streams;
   delete conf.streams;
@@ -108,16 +108,13 @@ var Logger = function(conf, bitwise, parent) {
 util.inherits(Logger, events.EventEmitter);
 
 /**
- *  Configure bitwise log levels.
+ *  Configure instance log levels.
  *
  *  @api private
- *
- *  @param bitwise A boolean indicating that log levels
- *  should use bitwise operators.
  */
-Logger.prototype.configure = function(bitwise) {
+Logger.prototype.configure = function() {
   this._levels = {}
-  var target = bitwise ? BITWISE : LEVELS;
+  var target = this.bitwise ? BITWISE : LEVELS;
   for(var z in target) {
     this._levels[z] = target[z];
     this[z.toUpperCase()] = this._levels[z];
@@ -435,11 +432,11 @@ Logger.prototype.log = function(level, message) {
  *  @param source A source log level configured on a stream.
  */
 Logger.prototype.enabled = function(level, source) {
-  var stream, bitwise = this.bitwise, i;
+  var stream, i;
   if(arguments.length === 1) {
     for(i = 0;i < this.streams.length;i++) {
       stream = this.streams[i];
-      if(bitwise) {
+      if(this.bitwise) {
         if((stream.level&level) === level) {
           return true;
         }
@@ -450,7 +447,7 @@ Logger.prototype.enabled = function(level, source) {
       }
     }
   }else{
-    if(bitwise) {
+    if(this.bitwise) {
       return (source&level) === level;
     }else{
       return level >= source;
@@ -512,9 +509,9 @@ Logger.prototype.child = function(conf, bitwise) {
  *  @return The lowest log level when no arguments are specified.
  */
 Logger.prototype.level = function(level) {
-  var i, j, stream, min = this._levels.none, bitwise = this.bitwise;
+  var i, j, stream, min = this._levels.none;
   if(!arguments.length) {
-    if(!bitwise) {
+    if(!this.bitwise) {
       for(i = 0;i < this.streams.length;i++) {
         stream = this.streams[i];
         min = Math.min(min, stream.level);
@@ -537,10 +534,10 @@ Logger.prototype.level = function(level) {
     }
     return min;
   }else{
-    if(bitwise && typeof(level) !== 'number') {
+    if(this.bitwise && typeof(level) !== 'number') {
       throw new Error('Value for bitwise levels must be a number');
     }
-    level = bitwise ? level : this.resolve(level);
+    level = this.bitwise ? level : this.resolve(level);
     for(i = 0;i < this.streams.length;i++) {
       stream = this.streams[i];
       stream.level = level;
