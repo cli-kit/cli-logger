@@ -66,23 +66,59 @@ Note that in normal mode you may use string log levels, such as `'trace'`, but i
 
 ## Configuration
 
-* `name`: The name of the logger, default is `basename(process.argv[1])`.
+* `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`.
 * `json`: Print log records as newline delimited JSON, default is `false`.
 * `level`: A default log level to use when a stream does not explicitly specify a log level, default is `INFO`.
-* `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`.
-* `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`.
-* `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`.
+* `name`: The name of the logger, default is `basename(process.argv[1])`.
 * `prefix`: A function used to prepend a prefix to log messages, default is `null`.
 * `serializers`: Map of log record property names to serialization functions,
   default is `null`.
+* `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`.
+* `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`.
+* `streams`: An array or object that configures the streams that log records are written to, by default if this property is not present a single stream is configured for `process.stdout`.
 * `writers`: Map of log level string names to console functions, default is
   `null`. Use this to customize the functions used when `console` is `true`,
   see [writers](#writers).
-* `streams`: An array or object that configures the streams that log records are written to, by default if this property is not present a single stream is configured for `process.stdout`.
 
 If you specify any unknown properties in the configuration then these are considered *persistent fields* and are added to every log record. This is a convenient way to add labels for sub-components to log records.
 
-## Streams
+### Console
+
+Set the `console` configuration property to redirect all log messages via `console` methods, this enables integration with the [ttycolor][ttycolor] module.
+
+The default mapping between log methods and `console` methods is:
+
+```javascript
+trace   // => console.log
+debug   // => console.log
+info    // => console.info
+warn    // => console.warn
+error   // => console.error
+fatal   // => console.error
+```
+
+### Writers
+
+You may customize the mapping between log methods and `console` methods by either specifying the `writers` configuration property as a `console` function (to set all log methods to the same `console` method):
+
+```javascript
+var conf = {console: true, writers: console.error};
+```
+
+Or by mapping inidividual log method names, for example if you would prefer `trace` and `debug` messages to be printed to `stderr`:
+
+```javascript
+var conf = {
+  console: true,
+  writers: {
+    trace: console.error,
+    debug: console.error
+  }
+}
+```
+
+
+### Streams
 
 Configuring output streams is typically done using an array, but as a convenience an object may be specified to configure a single output stream:
 
@@ -93,7 +129,7 @@ var logger = log(conf);
 // ...
 ```
 
-### File
+#### File
 
 You may configure a file stream by using the `path` stream property. For example, to log the `INFO` level and above to `stdout` and `ERROR` and above to a file:
 
@@ -128,7 +164,7 @@ var logger = log(conf);
 // ...
 ```
 
-The `encoding` and `mode` options supported by `fs.createWriteStream` are also respected if present. 
+The `encoding` and `mode` options supported by `fs.createWriteStream` are also respected if present.
 
 ## License
 
