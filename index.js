@@ -356,7 +356,7 @@ Logger.prototype.serialize = function(k, v) {
     && (typeof this.conf.serializers[k] === 'function')
     ? this.conf.serializers[k] : null;
   if(!serializer) return v;
-  return serializer(v);
+  return serializer.apply(this, [v]);
 }
 
 /**
