@@ -79,6 +79,23 @@ logger.fatal()          // FATAL: 60 | BW_FATAL: 32
 
 In normal mode the additional constant `NONE` (70) may be used to disable logging. In bitwise mode you may also use `BW_NONE` (0) and `BW_ALL` (63), `BW_ALL` is particularly useful for `XOR` operations.
 
+The API for getting and setting log levels is consistent with [bunyan][bunyan]:
+
+```javascript
+logger.info()               // => returns true if any stream is enabled for the info level
+logger.level()              // => returns a level integer (lowest level of all streams)
+logger.level(INFO)          // => sets all streams to the INFO level
+logger.level('info')        // => sets all streams to the INFO level (normal mode only)
+logger.level(BW_INFO)       // -> sets all streams to the INFO level (bitwise mode only)
+logger.levels()             // => gets an array of the levels of all streams
+logger.levels(0)            // => get level of stream at index zero
+logger.levels('foo')        // => get level of the stream named 'foo'
+logger.levels(0, INFO)      // => set level of stream at index zero to INFO
+logger.levels(0, 'info')    // => set level of stream at index zero to INFO (normal mode only)
+logger.levels(0, BW_INFO)   // => set level of stream at index zero to INFO (bitwise mode only)
+logger.levels('foo', WARN)  // => set level of stream named 'foo' to WARN
+```
+
 ## Configuration
 
 * `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`.
