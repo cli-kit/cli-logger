@@ -634,56 +634,8 @@ Logger.prototype.fatal = function() {
   return this.log.apply(this, args);
 }
 
-/**
- *  Creates a RingBuffer instance.
- *
- *  @param options The stream configuration options.
- */
-var RingBuffer = function(options) {
-  Writable.apply(this, arguments);
-  options = options || {};
-  this.limit = options.limit || 16;
-  this.records = [];
-}
-
-util.inherits(RingBuffer, Writable);
-
-/**
- *  Write to the underlying records array.
- *
- *  @param chunk The buffer or string to write, will
- *  be coerced to a string.
- */
-RingBuffer.prototype.write = function(chunk) {
-  var record = chunk;
-  if((chunk instanceof Buffer) || typeof chunk === 'string') {
-    record = '' + chunk;
-    record = record.replace(/\s+$/, '');
-  }
-  this.records.unshift(record);
-  if(this.records.length > this.limit) {
-    this.records.pop();
-  }
-}
-
-var serializers = {};
-serializers.req = function req(request) {
-  if(!request || !request.connection) return request;
-  return {
-    method: request.method,
-    url: request.url,
-    headers: request.headers,
-    remoteAddress: request.connection.remoteAddress,
-    remotePort: request.connection.remotePort
-  };
-}
-serializers.res = function res(response) {
-  if(!response || !response.statusCode) return response;
-  return {
-    statusCode: response.statusCode,
-    header: response._header
-  };
-}
+var RingBuffer = require('./lib/ring-buffer');
+var serializers = require('./lib/serializers');
 
 /**
  *  Create a logger.

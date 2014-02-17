@@ -1,6 +1,6 @@
 {
   "name": "cli-logger",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Logger implementation for command line interfaces",
   "author": "muji <noop@xpm.io>",
   "repository": {
@@ -30,6 +30,7 @@
   },
   "engine": [ "node >= 0.10.21" ],
   "scripts": {
+    "clean": "rm -f log/*.log",
     "test": "istanbul cover _mocha -- -u bdd --recursive --bail -A test/unit/"
   },
   "config" : {}
