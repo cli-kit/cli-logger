@@ -383,9 +383,8 @@ Logger.prototype.write = function(level, record, parameters) {
   }
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
-    json = (target.json === true && !listeners.length)
-      || (this.conf.json && !listeners.length);
-    if(json && (target.type !== RAW)) {
+    json = (target.json === true) || this.conf.json;
+    if(json && !listeners.length && (target.type !== RAW)) {
       if(this.bitwise) record.level = this.translate(record.level);
       record = JSON.stringify(record, circular());
     }
