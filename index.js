@@ -42,6 +42,7 @@ var defaults = {
   src: false,
   stack: false,
   console: false,
+  serializers: null,
   level: null,
   stream: null,
   streams: null
@@ -313,11 +314,11 @@ Logger.prototype.getLogRecord = function(level, message) {
   var record = {};
   record.time = new Date().toISOString();
   for(z in this.fields) {
-    record[z] = this.fields[z];
+    record[z] = this.serialize(z, this.fields[z]);
   }
   if(obj) {
     for(z in obj) {
-      record[z] = obj[z];
+      record[z] = this.serialize(z, obj[z]);
     }
     if(arguments.length == 2) {
       message = '';
@@ -340,6 +341,26 @@ Logger.prototype.getLogRecord = function(level, message) {
   }
   record.v = major;
   return {record: record, parameters: parameters};
+}
+
+/**
+ *  Serialize a log record value when a serializer
+ *  is available for the log record property name.
+ *
+ *  @api private
+ *
+ *  @param k The log record key.
+ *  @param v The log record value.
+ *
+ *  @return The original value when no serializer is declared
+ *  for the property or the result of invoking the serializer function.
+ */
+Logger.prototype.serialize = function(k, v) {
+  var serializer = this.conf.serializers
+    && (typeof this.conf.serializers[k] === 'function')
+    ? this.conf.serializers[k] : null;
+  if(!serializer) return v;
+  return serializer(v);
 }
 
 /**
@@ -656,11 +677,11 @@ serializers.req = function req(request) {
     remotePort: request.connection.remotePort
   };
 }
-serializers.res = function res(result) {
-  if(!result || !result.statusCode) return result;
+serializers.res = function res(response) {
+  if(!response || !response.statusCode) return response;
   return {
-    statusCode: result.statusCode,
-    header: result._header
+    statusCode: response.statusCode,
+    header: response._header
   };
 }
 
