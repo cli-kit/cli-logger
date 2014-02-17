@@ -83,6 +83,10 @@ var Logger = function(conf, bitwise, parent) {
   }
   var target = parent ? merge(parent.conf, {}) : merge(defaults, {});
   this.conf = merge(conf, target);
+  if(typeof this.conf.name !== 'string' || !this.conf.name.length) {
+    throw new Error('Logger name \'' + this.conf.name + '\' is invalid');
+  }
+  this.name = this.conf.name;
   conf.streams = streams;
   this.pid = this.conf.pid || process.pid;
   this.hostname = this.conf.hostname || os.hostname();
