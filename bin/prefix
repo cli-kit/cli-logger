@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+
+/**
+ *  Example of using a prefix function.
+ *
+ *  ./bin/prefix
+ *  ./bin/prefix > log/prefix.log 2>&1 && cat log/prefix.log
+ */
+require('ttycolor')().defaults();
+var log = require('..');
+var conf = {console: true, level: log.TRACE};
+conf.prefix = function(record) {
+  return this.name + '/' + record.pid + '@' + record.hostname
+    + ' [' + this.names(record.level) + '] ';
+}
+var logger = log(conf);
+log.keys.forEach(function(key) {
+  logger[key]('mock %s message', key);
+})
