@@ -68,6 +68,11 @@ Note that in normal mode you may use string log levels, such as `'trace'`, but i
 * `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`.
 * `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`.
 * `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`.
+* `serializers`: Map of log record property names to serialization functions,
+  default is `null`.
+* `writers`: Map of log level string names to console functions, default is
+  `null`. Use this to customize the functions used when `console` is `true`,
+  see [writers](#writers).
 * `streams`: An array or object that configures the streams that log records are written to, by default if this property is not present a single stream is configured for `process.stdout`.
 
 If you specify any unknown properties in the configuration then these are considered *persistent fields* and are added to every log record. This is a convenient way to add labels for sub-components to log records.

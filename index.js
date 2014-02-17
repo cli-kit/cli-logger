@@ -43,6 +43,7 @@ var defaults = {
   stack: false,
   console: false,
   serializers: null,
+  writers: null,
   level: null,
   stream: null,
   streams: null
@@ -91,14 +92,21 @@ var Logger = function(conf, bitwise, parent) {
   this.pid = this.conf.pid || process.pid;
   this.hostname = this.conf.hostname || os.hostname();
   if(this.conf.console) {
-    // TODO: allow modifying console writers in configuration
+    var writers = this.conf.writers || {};
+    if(typeof writers === 'function') {
+      var writer = writers;
+      writers = {};
+      keys.forEach(function(method) {
+        writers[method] = writer;
+      })
+    }
     this.writers = {};
-    this.writers[LEVELS.trace] = console.log;
-    this.writers[LEVELS.debug] = console.log;
-    this.writers[LEVELS.info] = console.info;
-    this.writers[LEVELS.warn] = console.warn;
-    this.writers[LEVELS.error] = console.error;
-    this.writers[LEVELS.fatal] = console.error;
+    this.writers[LEVELS.trace] = writers.trace || console.log;
+    this.writers[LEVELS.debug] = writers.debug || console.log;
+    this.writers[LEVELS.info] = writers.info || console.info;
+    this.writers[LEVELS.warn] = writers.warn || console.warn;
+    this.writers[LEVELS.error] = writers.error || console.error;
+    this.writers[LEVELS.fatal] = writers.fatal || console.error;
   }
   this.fields = {};
   this.streams = [];
