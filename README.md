@@ -82,18 +82,18 @@ In normal mode the additional constant `NONE` (70) may be used to disable loggin
 The API for getting and setting log levels is consistent with [bunyan][bunyan]:
 
 ```javascript
-logger.info()               // => returns true if any stream is enabled for the info level
-logger.level()              // => returns a level integer (lowest level of all streams)
-logger.level(INFO)          // => sets all streams to the INFO level
-logger.level('info')        // => sets all streams to the INFO level (normal mode only)
-logger.level(BW_INFO)       // -> sets all streams to the INFO level (bitwise mode only)
-logger.levels()             // => gets an array of the levels of all streams
-logger.levels(0)            // => get level of stream at index zero
-logger.levels('foo')        // => get level of the stream named 'foo'
-logger.levels(0, INFO)      // => set level of stream at index zero to INFO
-logger.levels(0, 'info')    // => set level of stream at index zero to INFO (normal mode only)
-logger.levels(0, BW_INFO)   // => set level of stream at index zero to INFO (bitwise mode only)
-logger.levels('foo', WARN)  // => set level of stream named 'foo' to WARN
+logger.info()               // true if any stream is enabled for the info level
+logger.level()              // get a level integer (lowest level of all streams)
+logger.level(INFO)          // sets all streams to the INFO level
+logger.level('info')        // sets all streams to the INFO level (normal only)
+logger.level(BW_INFO)       // sets all streams to the INFO level (bitwise only)
+logger.levels()             // gets an array of the levels of all streams
+logger.levels(0)            // get level of stream at index zero
+logger.levels('foo')        // get level of the stream named 'foo'
+logger.levels(0, INFO)      // set level of stream at index zero to INFO
+logger.levels(0, 'info')    // set level of stream at index zero to INFO (normal only)
+logger.levels(0, BW_INFO)   // set level of stream at index zero to INFO (bitwise only)
+logger.levels('foo', WARN)  // set level of stream named 'foo' to WARN
 ```
 
 ## Configuration
