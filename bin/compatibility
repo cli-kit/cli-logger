@@ -3,12 +3,17 @@
 /**
  *  Example for testing bunyan cli compatibility.
  *
+ *  Note this example configures the logger to use
+ *  bitwise mode to verify the bitwise log levels are
+ *  converted to bunyan compatible log levels when
+ *  converting the log record to JSON.
+ *
  *  ./bin/compatibility
  *  ./bin/compatibility | ./bunyan
  */
 
 var log = require('..');
-var logger = log.createLogger({level: log.TRACE});
+var logger = log.createLogger({level: log.BW_ALL}, true);
 log.keys.forEach(function(key) {
   logger[key]('mock %s message', key);
 })
