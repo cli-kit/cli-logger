@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+
+/**
+ *  Example for testing bunyan cli compatibility.
+ *
+ *  ./bin/compatibility
+ *  ./bin/compatibility | ./bunyan
+ */
+
+var log = require('..');
+var logger = log.createLogger({level: log.TRACE});
+log.keys.forEach(function(key) {
+  logger[key]('mock %s message', key);
+})

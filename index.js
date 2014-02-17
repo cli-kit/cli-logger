@@ -649,6 +649,12 @@ Logger.prototype.fatal = function() {
 var RingBuffer = require('./lib/ring-buffer');
 var serializers = require('./lib/serializers');
 
+function createLogger(conf, bitwise) {
+  conf = conf || {};
+  if(conf.json === undefined) conf.json = true;
+  return new Logger(conf, bitwise);
+}
+
 /**
  *  Create a logger.
  *
@@ -666,6 +672,7 @@ module.exports.types = types;
 module.exports.keys = keys;
 module.exports.serializers = serializers;
 module.exports.circular = circular;
+module.exports.createLogger = createLogger;
 module.exports.Logger = Logger;
 module.exports.RingBuffer = RingBuffer;
 for(z in LEVELS) {
