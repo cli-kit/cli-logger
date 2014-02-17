@@ -24,7 +24,7 @@ describe('cli-logger:', function() {
     }
     log.info(msg);
   });
-  it('should log info message (json stream stringify code path)',
+  it('should log info message createLogger (json stream stringify)',
     function(done) {
       var msg = 'mock json info message';
       var name = 'mock-json-logger';
@@ -39,7 +39,7 @@ describe('cli-logger:', function() {
       log.info(msg);
     }
   );
-  it('should log info message (json stream stringify code path)',
+  it('should log info message createLogger+json (json stream stringify)',
     function(done) {
       var msg = 'mock json info message';
       var name = 'mock-json-logger';
@@ -51,6 +51,17 @@ describe('cli-logger:', function() {
         expect(record.msg).to.eql(msg);
         done();
       }
+      log.info(msg);
+    }
+  );
+  it('should log info message createLogger-conf (json stream stringify)',
+    function(done) {
+      var msg = 'mock json info message';
+      var log = logger.createLogger();
+      log.on('write', function(record) {
+        expect(record.msg).to.eql(msg);
+        done();
+      });
       log.info(msg);
     }
   );

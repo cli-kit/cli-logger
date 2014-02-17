@@ -671,7 +671,7 @@ module.exports.levels = LEVELS;
 module.exports.bitwise = BITWISE;
 module.exports.types = types;
 module.exports.keys = keys;
-module.exports.serializers = serializers;
+module.exports.serializers = module.exports.stdSerializers = serializers;
 module.exports.circular = circular;
 module.exports.createLogger = createLogger;
 module.exports.Logger = Logger;
