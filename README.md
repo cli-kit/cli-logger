@@ -119,6 +119,7 @@ log.levels('foo', WARN)  // set level of stream named 'foo' to WARN
   default is `null`.
 * `src`: A boolean that indicates that file name, line number and function name (when available) should be included in the log record, default is `false`.
 * `stack`: A boolean used in conjunction with `src` to also include an array of the stack trace caller information, default is `false`.
+* `stream`: Shortcut for specifying a stream for single stream loggers, default is `null`, see [streams](#streams).
 * `streams`: An array or object that configures the streams that log records are written to, by default if this property is not present a single stream is configured for `process.stdout`.
 * `writers`: Map of log level string names to console functions, default is
   `null`. Use this to customize the functions used when `console` is `true`,
@@ -184,6 +185,15 @@ Configuring output streams is typically done using an array, but as a convenienc
 ```javascript
 var logger = require('cli-logger');
 var conf = {streams: {stream: process.stderr, level: log.WARN}}
+var log = logger(conf);
+// ...
+```
+
+Or even more succinctly for single stream loggers you can specify `stream` at the configuration level:
+
+```javascript
+var logger = require('cli-logger');
+var conf = {stream: process.stderr, level: log.FATAL}
 var log = logger(conf);
 // ...
 ```

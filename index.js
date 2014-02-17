@@ -66,11 +66,12 @@ var Logger = function(conf, bitwise, parent) {
   this.bitwise = (bitwise === true);
   this.configure();
   var cstreams = parent && conf.streams;
-  var streams = conf.streams;
-  delete conf.streams;
+  var streams = conf.streams, stream = conf.stream;
   streams = streams || {
-    stream: process.stdout
+    stream: stream || process.stdout
   }
+  delete conf.streams;
+  delete conf.stream;
   var target = parent ? merge(parent.conf, {}) : merge(defaults, {});
   this.conf = merge(conf, target);
   if(typeof this.conf.name !== 'string' || !this.conf.name.length) {
@@ -78,6 +79,7 @@ var Logger = function(conf, bitwise, parent) {
   }
   this.name = this.conf.name;
   conf.streams = streams;
+  if(stream) conf.stream = stream;
   this.pid = this.conf.pid || process.pid;
   this.hostname = this.conf.hostname || os.hostname();
   if(this.conf.console) {
