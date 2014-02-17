@@ -34,12 +34,12 @@ Unless [streams](#streams) have been configured all log messages are written to 
 Normal mode uses log levels that correspond to the [bunyan][bunyan] log levels and behaviour (log messages are written if they are greater than or equal to the configured log level): 
 
 ```javascript
-var log = require('cli-logger');
+var logger = require('cli-logger');
 var conf = {level: log.WARN};
-logger = log(conf);
-logger.warn('mock %s message', 'warn');
+log = logger(conf);
+log.warn('mock %s message', 'warn');
 // this will not be logged as the log level is warn
-logger.info('mock %s message', 'info');
+log.info('mock %s message', 'info');
 ```
 
 ### Bitwise
@@ -47,19 +47,19 @@ logger.info('mock %s message', 'info');
 Using bitwise log levels allows fine-grained control of how log messages are routed, to enable bitwise mode pass `true` as the second argument when creating the logger:
 
 ```javascript
-var log = require('cli-logger');
+var logger = require('cli-logger');
 var conf = {level: log.BW_INFO|log.BW_FATAL};
-logger = log(conf, true);
-logger.info('mock %s message', 'info');
+log = logger(conf, true);
+log.info('mock %s message', 'info');
 ```
 
 If you just want to disable one or two log levels it is more convenient to use the `XOR` operator:
 
 ```javascript
-var log = require('cli-logger');
+var logger = require('cli-logger');
 var conf = {level: log.BW_ALL^log.BW_TRACE};
-logger = log(conf, true);
-logger.info('mock %s message', 'info');
+log = logger(conf, true);
+log.info('mock %s message', 'info');
 ```
 
 Note that in normal mode you may use string log levels, such as `'trace'`, but in bitwise mode you may only use integer log levels.
@@ -165,15 +165,26 @@ var conf = {
 }
 ```
 
+### JSON
+
+This module is designed for command line interfaces so JSON output is not enabled by default, you may enable JSON output for all streams by specifying the `json` configuration option or enable for specific streams by specifying the `json` property on a stream.
+
+Alternatively, you can use `createLogger` to set the `json` configuration property if it is not defined:
+
+```javascript
+var logger = require('cli-logger');
+log = logger.createLogger();
+// ...
+```
 
 ### Streams
 
 Configuring output streams is typically done using an array, but as a convenience an object may be specified to configure a single output stream:
 
 ```javascript
-var log = require('cli-logger');
+var logger = require('cli-logger');
 var conf = {streams: {stream: process.stderr, level: log.WARN}}
-var logger = log(conf);
+var log = logger(conf);
 // ...
 ```
 
@@ -182,7 +193,7 @@ var logger = log(conf);
 You may configure a file stream by using the `path` stream property. For example, to log the `INFO` level and above to `stdout` and `ERROR` and above to a file:
 
 ```javascript
-var log = require('cli-logger');
+var logger = require('cli-logger');
 var conf = {streams: [
   {
     stream: process.stdout,
@@ -193,14 +204,14 @@ var conf = {streams: [
     level: log.ERROR
   }
 ]};
-var logger = log(conf);
+var log = logger(conf);
 // ...
 ```
 
 When creating file streams the default flags used is `a` you may specify the `flags` property to change this behaviour:
 
 ```javascript
-var log = require('cli-logger');
+var logger = require('cli-logger');
 var conf = {streams: [
   {
     path: 'log/errors.log',
@@ -208,7 +219,7 @@ var conf = {streams: [
     level: log.ERROR
   }
 ]};
-var logger = log(conf);
+var log = logger(conf);
 // ...
 ```
 
