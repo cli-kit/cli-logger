@@ -64,6 +64,21 @@ logger.info('mock %s message', 'info');
 
 Note that in normal mode you may use string log levels, such as `'trace'`, but in bitwise mode you may only use integer log levels.
 
+## Log Levels
+
+The log levels correspond to a method on the logger, the methods and corresponding module constants are shown below:
+
+```javascript
+logger.trace()          // TRACE: 10 | BW_TRACE: 1
+logger.debug()          // DEBUG: 20 | BW_DEBUG: 2
+logger.info()           // INFO: 30  | BW_INFO: 4
+logger.warn()           // WARN: 40  | BW_WARN: 8
+logger.error()          // ERROR: 50 | BW_ERROR: 16
+logger.fatal()          // FATAL: 60 | BW_FATAL: 32
+```
+
+In normal mode the additional constant `NONE` (70) may be used to disable logging. In bitwise mode you may also use `BW_NONE` (0) and `BW_ALL` (63), `BW_ALL` is particularly useful for `XOR` operations.
+
 ## Configuration
 
 * `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`.
@@ -96,6 +111,10 @@ warn    // => console.warn
 error   // => console.error
 fatal   // => console.error
 ```
+
+If required you could define your own function that has the same signature as a `console` method (`function(message, ...)`) to create different output styles using the [ttycolor][ttycolor] module methods.
+
+Run the [color][color] example program to see the default output.
 
 ### Writers
 
@@ -175,3 +194,5 @@ Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license
 
 [bin]: https://github.com/freeformsystems/cli-logger/tree/master/bin
 [test suite]: https://github.com/freeformsystems/cli-logger/tree/master/test/unit
+
+[color]: https://github.com/freeformsystems/cli-logger/tree/master/bin/color
