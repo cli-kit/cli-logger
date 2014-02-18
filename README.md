@@ -361,11 +361,13 @@ If a listener exists for this event it is invoked with all the log record inform
 function write(record, stream, msg, parameters)
 ```
 
-Note that `record.msg` contains the message with parameters substituted, whilst the `msg` and `parameters` are the raw message and replacement parameters should you need them. 
+Note that `record.msg` contains the message with parameters substituted, whilst `msg` and `parameters` are the raw message and replacement parameters should you need them. 
+
+This event will fire once for each stream that is enabled for the log level associated with the record and effectively disables all the default logic for writing log records, if you listen for this event it is your responsibility  to process the log record.
 
 ### log
 
-Emitted when a log record has been written to stream(s), if listeners exist for the `write` event, this event will not fire.
+Emitted when a log record has been written to stream(s), if listeners exist for `write` this event will not fire.
 
 ```javascript
 function log(record, level, msg, parameters)
