@@ -57,10 +57,6 @@ describe('cli-logger:', function() {
     expect(ringbuffer.records.length)
       .to.eql(logger.keys.length)
       .to.eql(ringbuffer.limit);
-    ringbuffer.write(ringbuffer.records[0].msg);
-    expect(ringbuffer.records.length)
-      .to.eql(logger.keys.length)
-      .to.eql(ringbuffer.limit);
     done();
   });
   it('should flush ring buffer records to stderr', function(done) {
