@@ -286,6 +286,14 @@ See the [serialize][serialize] example program.
 
 ### Streams
 
+The following types of streams are supported:
+
+* `stream`: An existing stream such as `process.stdout`, `process.stderr` or some other writable stream. 
+* `file`: Creates a writable stream from a string file system path.
+* `raw`: Forces the raw log record to always be passed to the `write()` method of the stream.
+
+#### Stream
+
 Configuring output streams is typically done using an array, but as a convenience an object may be specified to configure a single output stream:
 
 ```javascript
@@ -341,6 +349,18 @@ var log = logger(conf);
 
 The `encoding` and `mode` options supported by `fs.createWriteStream` are also respected if present.
 
+#### Raw
+
+The raw stream type is useful when you want to ensure that the stream implementation is passed the raw log record,  this type is implied when using a [ring buffer](#ring-buffer).
+
+## Ring Buffer
+
+The `RingBuffer` implementation does not write records to a stream it gathers them into an array (with a specified limit) and optionally can flush the records to a stream at a later time.
+
+This is useful if you wish to keep track of all (or some) log messages and then write a debug log file when a particular event occurs (such as a fatal error).
+
+See the [ringbuffer][ringbuffer] example program.
+
 ## Events
 
 The `Logger` implementation dispatches the following events:
@@ -352,6 +372,16 @@ Emitted if there is an error on an underlying stream, it is recommended you list
 ```javascript
 function error(err, stream)
 ```
+
+### log
+
+Emitted when a log record has been written to stream(s), if listeners exist for `write` this event will not fire.
+
+```javascript
+function log(record, level, msg, parameters)
+```
+
+Note that if a log record is written to multiple streams this event will only be emitted once for the log record.
 
 ### write
 
@@ -365,16 +395,6 @@ Note that `record.msg` contains the message with parameters substituted, whilst 
 
 This event will fire once for each stream that is enabled for the log level associated with the record and effectively disables all the default logic for writing log records, if you listen for this event it is your responsibility  to process the log record.
 
-### log
-
-Emitted when a log record has been written to stream(s), if listeners exist for `write` this event will not fire.
-
-```javascript
-function log(record, level, msg, parameters)
-```
-
-Note that if a log record is written to multiple streams this event will only be emitted once for the log record.
-
 ## License
 
 Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license](/LICENSE) if you feel inclined.
@@ -387,5 +407,6 @@ Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license
 
 [color]: https://github.com/freeformsystems/cli-logger/tree/master/bin/color
 [prefix]: https://github.com/freeformsystems/cli-logger/tree/master/bin/prefix
+[ringbuffer]: https://github.com/freeformsystems/cli-logger/tree/master/bin/ringbuffer
 [serialize]: https://github.com/freeformsystems/cli-logger/tree/master/bin/serialize
 [source]: https://github.com/freeformsystems/cli-logger/tree/master/bin/source
