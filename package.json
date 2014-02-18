@@ -1,6 +1,6 @@
 {
   "name": "cli-logger",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Logger implementation for command line interfaces",
   "author": "muji <noop@xpm.io>",
   "repository": {

@@ -4,6 +4,8 @@ Logger implementation for command line interfaces.
 
 This module is inspired by and borrows from [bunyan][bunyan] it differs primarily in that it is designed for command line interfaces rather than long running services. For all intents and purposes it is a drop in replacement for [bunyan][bunyan], see [credits](#credits) for more information.
 
+The library is considered feature complete and ready for use, however the major version has not been incremented to `1` to maintain compatibility with [bunyan][bunyan].
+
 ## Install
 
 ```
