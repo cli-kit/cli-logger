@@ -341,6 +341,14 @@ var log = logger(conf);
 
 The `encoding` and `mode` options supported by `fs.createWriteStream` are also respected if present.
 
+## Events
+
+The `Logger` implementation dispatches the following events:
+
+* `error`: Emitted if there is an error on an underlying stream, it is recommended you listen for this event.
+* `write`: If a listener exists for this event it is invoked with all the log record information and no data is written by the logger to the underlying streams.
+* `log`: Emitted when a log record has been written to stream(s), if listeners exist for the `write` event, this event will not fire.
+
 ## License
 
 Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license](/LICENSE) if you feel inclined.
