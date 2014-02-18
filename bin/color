@@ -8,7 +8,8 @@
  */
 require('ttycolor')().defaults();
 var log = require('..');
-var logger = log({console: true, level: log.TRACE});
+//var logger = log({console: true, level: log.TRACE});
+var logger = log({console: true, level: log.BW_ALL}, true);
 log.keys.forEach(function(key) {
   logger[key]('mock %s message', key);
 })

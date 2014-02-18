@@ -92,12 +92,12 @@ var Logger = function(conf, bitwise, parent) {
       })
     }
     this.writers = {};
-    this.writers[LEVELS.trace] = writers.trace || console.log;
-    this.writers[LEVELS.debug] = writers.debug || console.log;
-    this.writers[LEVELS.info] = writers.info || console.info;
-    this.writers[LEVELS.warn] = writers.warn || console.warn;
-    this.writers[LEVELS.error] = writers.error || console.error;
-    this.writers[LEVELS.fatal] = writers.fatal || console.error;
+    this.writers[this.TRACE] = writers.trace || console.log;
+    this.writers[this.DEBUG] = writers.debug || console.log;
+    this.writers[this.INFO] = writers.info || console.info;
+    this.writers[this.WARN] = writers.warn || console.warn;
+    this.writers[this.ERROR] = writers.error || console.error;
+    this.writers[this.FATAL] = writers.fatal || console.error;
   }
   this.fields = {};
   this.streams = [];
