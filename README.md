@@ -2,6 +2,8 @@
 
 Logger implementation for command line interfaces.
 
+This module is inspired by and borrows from [bunyan][bunyan] it differs primarily in that it is designed for command line interfaces rather than long running services. For all intents and purposes it is a drop in replacement for [bunyan][bunyan], see [credits](#credits) for more information.
+
 ## Install
 
 ```
@@ -452,12 +454,34 @@ See the [record][record] example program.
 * `msg`: Required string. Must be supplied when calling a log method.
 * `src`: Optional object, contains log caller information. Automatically added if the `src` configuration property has been set.
 
+You may add your own fields to log records by specifying an object as the first argument to a log method, see [messages](#messages). 
+
+## Credits
+
+This module is inspired by [bunyan][bunyan], by far the best logging library for [node][node]. Thanks to [trentm][trentm] for the elegant library.
+
+The following functions have been borrowed more or less verbatim from [bunyan][bunyan]:
+
+* `circular` (`safeCycles`)
+* `getCallerInfo` (`getCaller3Info`)
+* `getFullErrorStack`
+* `serializers` (`stdSerializers`)
+
+### Caveats
+
+Bugs notwithstanding, the following list of caveats apply:
+
+* `dtrace`: This library has no `dtrace` support as it is far less likely to be required for command line interfaces. Furthermore, we have had intermittent compile errors while building `dtrace` on Linux which at times has broken automated deployment.
+* `rotating-file`: The rotating file stream type has not been implemented as it is more applicable to long running services, if it is ever implemented it will be based on file size as opposed to daily rotation.
+
 ## License
 
 Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license](/LICENSE) if you feel inclined.
 
 [ttycolor]: https://github.com/freeformsystems/ttycolor
 [bunyan]: https://github.com/trentm/node-bunyan
+[node]: http://nodejs.org/
+[trentm]: https://github.com/trentm
 
 [bin]: https://github.com/freeformsystems/cli-logger/tree/master/bin
 [test suite]: https://github.com/freeformsystems/cli-logger/tree/master/test/unit
