@@ -89,7 +89,7 @@ log.error()          // ERROR: 50 | BW_ERROR: 16
 log.fatal()          // FATAL: 60 | BW_FATAL: 32
 ```
 
-In normal mode the additional constant `NONE` (70) may be used to disable logging. In bitwise mode you may also use `BW_NONE` (0) and `BW_ALL` (63), `BW_ALL` is particularly useful for `XOR` operations.
+In normal mode the additional constant `NONE` (70) may be used to disable logging. In bitwise mode you may also use `BW_NONE` (0) and `BW_ALL` (63), `BW_ALL` is particularly useful for `XOR` operations, see [constants](#constants).
 
 The API for getting and setting log levels is consistent with [bunyan][bunyan]:
 
@@ -394,6 +394,32 @@ function write(record, stream, msg, parameters)
 Note that `record.msg` contains the message with parameters substituted, whilst `msg` and `parameters` are the raw message and replacement parameters should you need them. 
 
 This event will fire once for each stream that is enabled for the log level associated with the record and effectively disables all the default logic for writing log records, if you listen for this event it is your responsibility  to process the log record.
+
+## Constants
+
+The exposed log level constants deserve some attention. The module exposes all normal mode levels as constants, eg `INFO` and prefixes bitwise constants for example, `BW_INFO`. However constants are also exposed on the instance regardless of mode, such that the following is possible:
+
+```javascript
+var logger = require('cli-logger');
+log = logger();
+// set level of all streams to warn
+log.level(log.WARN);
+// ...
+```
+
+The equivalent for bitwise mode is:
+
+```javascript
+var logger = require('cli-logger');
+log = logger(null, true);
+// set level of all streams to warn
+log.level(log.WARN);
+// ...
+```
+
+Note that no prefix is necessary when accessing constants on the instance.
+
+The rule of thumb is that if you are setting log levels in the configuration then use the prefixed constants for bitwise mode. If you are setting log levels after instantiation then you can use the constants exposed by the `Logger` instance without a prefix regardless of mode.
 
 ## License
 
