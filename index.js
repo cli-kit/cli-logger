@@ -230,12 +230,6 @@ Logger.prototype.convert = function(source) {
   if(!~types.indexOf(source.type)) {
     throw new Error('Unknown stream type \'' + source.type + '\'');
   }
-  //if(source.stream && !(source.stream instanceof Writable)
-    //&& source.stream !== process.stdout
-    //&& source.stream !== process.stderr) {
-    //throw new Error('Invalid stream specified');
-  //}
-
   if(source.stream && !(source.stream instanceof EventEmitter)
     && typeof source.stream.write !== 'function') {
     throw new Error('Invalid stream specified');
@@ -383,11 +377,9 @@ Logger.prototype.serialize = function(k, v) {
 Logger.prototype.write = function(level, record, parameters) {
   var i, target, listeners = this.listeners('write'), json, params, event;
   var msg = '' + record.msg;
-  if(!this.conf.console && parameters) {
-    params = parameters.slice(0);
-    params.unshift(record.msg);
-    record.msg = util.format.apply(util, params);
-  }
+  params = parameters.slice(0);
+  params.unshift(record.msg);
+  record.msg = util.format.apply(util, params);
   if(typeof this.conf.prefix === 'function') {
     record.msg = this.conf.prefix.apply(this, [record]) + record.msg;
   }
@@ -414,19 +406,6 @@ Logger.prototype.write = function(level, record, parameters) {
         }else{
           target.stream.write(record.msg + '\n');
         }
-
-        //if(this.conf.console && this.writers[level]) {
-          //this.writers[level].apply(
-            //console, [record.msg].concat(parameters));
-        //}else{
-          //if(typeof json === 'string') {
-            //target.stream.write(json + '\n');
-          //}else if(target.type === RAW){
-            //target.stream.write(record);
-          //}else{
-            //target.stream.write(record.msg + '\n');
-          //}
-        //}
       }
     }
   }
