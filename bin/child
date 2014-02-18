@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+
+/**
+ *  Example for testing child loggers.
+ *
+ *  ./bin/child
+ *  ./bin/child | ./bunyan
+ */
+var Component = function(parent) {
+  this.message = 'mock %s message';
+  this.name = 'subcomponent';
+  var options = {component: this.name};
+  this.logger = parent.child(options);
+}
+
+Component.prototype.print = function() {
+  this.logger.info(this.message, this.name);
+}
+
+var log = require('..');
+var conf = {
+  json: true,
+  streams: [
+    {
+      stream: process.stdout,
+      level: log.TRACE
+    },
+    {
+      stream: process.stderr,
+      level: log.WARN
+    }
+  ]
+}
+var logger = log(conf);
+var widget = new Component(logger);
+logger.info('started logging');
+widget.print();
+logger.info('stopped logging');

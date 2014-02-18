@@ -387,6 +387,16 @@ log.warn('mock %s message', 'warn');
 
 See the [json][json] example program.
 
+## Child Loggers
+
+The module supports child loggers to label subcomponents of your application and follows the same rules as [bunyan][bunyan]:
+
+* All streams are inherited from the parent logger, you may configure child loggers with additional streams but you cannot remove the streams inherited from the parent.
+* The parent's serializers are inherited though may be overriden in the child.
+* Changes to the log level of a child logger do not affect the parent log level.
+
+See the [child][child] example program.
+
 ## Ring Buffer
 
 The `RingBuffer` implementation does not write records to a stream it gathers them into an array (with a specified limit) and optionally can flush the records to a stream at a later time.
@@ -604,7 +614,7 @@ Create a `Logger` instance.
 
 #### child([conf], [bitwise])
 
-Creates a child `Logger` instance.
+Creates a child `Logger` instance, see [child loggers](#child-loggers).
 
 * `conf`: A configuration for the child logger.
 * `bitwise`: A boolean indicating the child logger uses bitwise log levels.
@@ -770,6 +780,7 @@ Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license
 [bin]: https://github.com/freeformsystems/cli-logger/tree/master/bin
 [test suite]: https://github.com/freeformsystems/cli-logger/tree/master/test/unit
 
+[child]: https://github.com/freeformsystems/cli-logger/tree/master/bin/child
 [color]: https://github.com/freeformsystems/cli-logger/tree/master/bin/color
 [json]: https://github.com/freeformsystems/cli-logger/tree/master/bin/json
 [prefix]: https://github.com/freeformsystems/cli-logger/tree/master/bin/prefix
