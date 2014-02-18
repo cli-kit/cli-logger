@@ -486,6 +486,258 @@ See the [record][record] example program.
 
 You may add your own fields to log records by specifying an object as the first argument to a log method, see [messages](#messages). 
 
+## API
+
+### Module
+
+#### logger([conf], [bitwise])
+
+Create a `Logger` instance.
+
+* `conf`: A configuration for the logger.
+* `bitwise`: A boolean indicating the logger uses bitwise log levels.
+
+```javascript
+var logger = require('cli-logger');
+var log = logger();
+```
+
+#### createLogger([conf], [bitwise])
+
+Create a `Logger` instance and enable JSON log records for all streams.
+
+* `conf`: A configuration for the logger.
+* `bitwise`: A boolean indicating the logger uses bitwise log levels.
+
+```javascript
+var logger = require('cli-logger');
+var log = logger.createLogger();
+```
+
+#### bitwise
+
+Map of all bitwise mode constants.
+
+#### circular
+
+Reference to the function used to safely `stringify` objects that may contain circular references.
+
+#### ConsoleStream
+
+Reference to the `ConsoleStream` class.
+
+#### keys
+
+Array of log method names.
+
+#### levels
+
+Map of all normal mode constants.
+
+#### Logger
+
+Reference to the `Logger` class.
+
+#### RingBuffer
+
+Reference to the `RingBuffer` class.
+
+#### serializers
+
+Map of standard serializer functions, aliased via `stdSerializers`, see [serializers](#serializers).
+
+#### types
+
+Array of supported stream types.
+
+#### Constants (miscellaneous)
+
+* `CONSOLE`: String representing the console stream type.
+* `FILE`: String representing the file stream type.
+* `LOG_VERSION`: Integer indicating the module major version.
+* `RAW`: String representing the raw stream type.
+* `STREAM`: String representing the stream type.
+
+#### Constants (normal)
+
+* `TRACE`: Integer representing the trace log level.
+* `DEBUG`: Integer representing the debug log level.
+* `INFO`: Integer representing the info log level.
+* `WARN`: Integer representing the warn log level.
+* `ERROR`: Integer representing the error log level.
+* `FATAL`: Integer representing the fatal log level.
+* `NONE`: Integer representing the none log level.
+
+#### Constants (bitwise)
+
+* `BW_NONE`: Integer representing the none log level.
+* `BW_TRACE`: Integer representing the trace log level.
+* `BW_DEBUG`: Integer representing the debug log level.
+* `BW_INFO`: Integer representing the info log level.
+* `BW_WARN`: Integer representing the warn log level.
+* `BW_ERROR`: Integer representing the error log level.
+* `BW_FATAL`: Integer representing the fatal log level.
+* `BW_ALL`: Integer representing the all log level.
+
+### ConsoleStream
+
+Class used to redirect log records to `console` methods.
+
+#### ConsoleStream([options])
+
+Create a `ConsoleStream` instance.
+
+* `options`: Options for the console stream.
+
+The `options` may contain a `writers` property to map log level string names to `console` functions, see [writers](#writers).
+
+### Logger
+
+Class representing the logger implementation.
+
+#### Logger([conf], [bitwise])
+
+Create a `Logger` instance.
+
+* `conf`: A configuration for the logger.
+* `bitwise`: A boolean indicating the logger uses bitwise log levels.
+
+#### child([conf], [bitwise])
+
+Creates a child `Logger` instance.
+
+* `conf`: A configuration for the child logger.
+* `bitwise`: A boolean indicating the child logger uses bitwise log levels.
+
+#### conf
+
+Map of the logger configuration.
+
+#### debug([object], message, ...)
+
+Log a debug message.
+
+* `object`: An object or `Error` instance.
+* `message`: The log message.
+* `...`: Message replacement parameters.
+
+Returns a boolean indicating whether the log record was written to a stream.
+
+When invoked with zero arguments this method returns a boolean indicating if the `debug` level is enabled for any stream.
+
+#### error([object], message, ...)
+
+Log an error message.
+
+* `object`: An object or `Error` instance.
+* `message`: The log message.
+* `...`: Message replacement parameters.
+
+Returns a boolean indicating whether the log record was written to a stream.
+
+When invoked with zero arguments this method returns a boolean indicating if the `error` level is enabled for any stream.
+
+#### fatal([object], message, ...)
+
+Log a fatal error message.
+
+* `object`: An object or `Error` instance.
+* `message`: The log message.
+* `...`: Message replacement parameters.
+
+Returns a boolean indicating whether the log record was written to a stream.
+
+When invoked with zero arguments this method returns a boolean indicating if the `fatal` level is enabled for any stream.
+
+#### info([object], message, ...)
+
+Log an info message.
+
+Returns a boolean indicating whether the log record was written to a stream.
+
+When invoked with zero arguments this method returns a boolean indicating if the `info` level is enabled for any stream.
+
+#### level([level])
+
+Get or set the log level for all streams, see [log levels](#log-levels).
+
+* `level`: Integer level to set on all streams.
+
+Returns the lowest level of all streams when invoked with no arguments.
+
+#### levels([name], [level])
+
+Get or set the log level for individual streams, see [log levels](#log-levels).
+
+* `name`: The name of the stream or a valid index into the streams array.
+* `level`: Integer level to set on a stream.
+
+Returns an array of the levels of all streams when invoked with no arguments.
+
+#### name
+
+The string name of the logger.
+
+#### names(level, [complex])
+
+Retrieve the string name of a level from a log level integer.
+
+* `level`: The log level integer.
+* `complex`: A boolean indicating that complex bitwise log levels should be resolved to an array of names.
+
+Returns the string log level, or if `complex` is specified an array of log level names.
+
+If `level` could not be resolved to a string name (unknown level) it is returned.
+
+#### trace([object], message, ...)
+
+Log a trace message.
+
+* `object`: An object or `Error` instance.
+* `message`: The log message.
+* `...`: Message replacement parameters.
+
+Returns a boolean indicating whether the log record was written to a stream.
+
+When invoked with zero arguments this method returns a boolean indicating if the `trace` level is enabled for any stream.
+
+#### warn([object], message, ...)
+
+Log a warn message.
+
+* `object`: An object or `Error` instance.
+* `message`: The log message.
+* `...`: Message replacement parameters.
+
+Returns a boolean indicating whether the log record was written to a stream.
+
+When invoked with zero arguments this method returns a boolean indicating if the `warn` level is enabled for any stream.
+
+### RingBuffer
+
+Class used to buffer log records in an array.
+
+#### RingBuffer([options])
+
+Create a `RingBuffer` instance.
+
+* `options`: Options for the ring buffer.
+
+The `options` may contain a `limit` integer which determines the maximum number of records to buffer and a `json` boolean which indicates that the log records should be written as JSON when they are flushed.
+
+#### flush(stream, [options])
+
+Flush buffered log records to a stream, the buffered log records are cleared as they are written to the stream.
+
+* `stream`: A string file system path or an existing writable stream.
+* `options`: Options passed to `fs.createWriteStream` when `stream` is a string.
+
+When `stream` is a string the created writable stream is destroyed once all records have been written, otherwise if a writable stream is passed you should destroy the stream when necessary.
+
+If `stream` is a string and no `options` are passed the `w` mode is used with `utf8` encoding.
+
+Returns the writable stream.
+
 ## Credits
 
 This module is inspired by [bunyan][bunyan], by far the best logging library for [node][node]. Thanks to [trentm][trentm] for the elegant library.

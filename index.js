@@ -412,7 +412,7 @@ Logger.prototype.write = function(level, record, parameters) {
   if(event) {
     this.emit('log', record, record.level, msg, parameters);
   }
-  return (listeners.length === 0);
+  return (listeners.length === 0 && event !== undefined);
 }
 
 /**
@@ -721,4 +721,5 @@ for(z in BITWISE) {
 module.exports.RAW = RAW;
 module.exports.STREAM = STREAM;
 module.exports.FILE = FILE;
+module.exports.CONSOLE = CONSOLE;
 module.exports.LOG_VERSION = major;
