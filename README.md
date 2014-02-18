@@ -476,6 +476,8 @@ Bugs notwithstanding, the following list of caveats apply:
 * `dtrace`: This library has no `dtrace` support as it is far less likely to be required for command line interfaces. Furthermore, we have had intermittent compile errors while building `dtrace` on Linux which at times has broken automated deployment.
 * `rotating-file`: The rotating file stream type has not been implemented as it is more applicable to long running services, if it is ever implemented it will be based on file size as opposed to daily rotation.
 
+This library does not provide a command line tool to inspect JSON log records as it is designed to be compatible with `bunyan(1)` which you can use to view and query JSON logs.
+
 ## License
 
 Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license](/LICENSE) if you feel inclined.
