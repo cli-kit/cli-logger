@@ -98,18 +98,17 @@ In normal mode the additional constant `NONE` (70) may be used to disable loggin
 The API for getting and setting log levels is identical to [bunyan][bunyan]:
 
 ```javascript
-log.info()               // true if any stream is enabled for the info level
-log.level()              // get a level integer (lowest level of all streams)
-log.level(INFO)          // sets all streams to the INFO level
-log.level('info')        // sets all streams to the INFO level (normal only)
-log.level(BW_INFO)       // sets all streams to the INFO level (bitwise only)
-log.levels()             // gets an array of the levels of all streams
-log.levels(0)            // get level of stream at index zero
-log.levels('foo')        // get level of the stream named 'foo'
-log.levels(0, INFO)      // set level of stream at index zero to INFO
-log.levels(0, 'info')    // set level of stream at index zero to INFO (normal only)
-log.levels(0, BW_INFO)   // set level of stream at index zero to INFO (bitwise only)
-log.levels('foo', WARN)  // set level of stream named 'foo' to WARN
+log.info()                    // true if any stream is enabled for the info level
+log.level()                   // get a level integer (lowest level of all streams)
+log.level(log.INFO)           // sets all streams to the INFO level
+log.level('info')             // sets all streams to the INFO level (normal only)
+log.levels()                  // gets an array of the levels of all streams
+log.levels(0)                 // get level of stream at index zero
+log.levels('foo')             // get level of the stream named 'foo'
+log.levels(0, log.INFO)       // set level of stream at index zero to INFO
+log.levels(0, 'info')         // set level of stream at index zero to INFO (normal only)
+log.levels(0, log.INFO)       // set level of stream at index zero to INFO
+log.levels('foo', log.WARN)   // set level of stream named 'foo' to WARN
 ```
 
 ## Configuration
