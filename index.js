@@ -1,4 +1,4 @@
-var events = require('events');
+var EventEmitter = require('events').EventEmitter;
 var fs = require('fs');
 var os = require('os');
 var path = require('path'), basename = path.basename;
@@ -61,7 +61,7 @@ var circular = require('./lib/circular');
  *  @param parent A parent logger that owns this logger.
  */
 var Logger = function(conf, bitwise, parent) {
-  events.EventEmitter.call(this);
+  EventEmitter.call(this);
   conf = conf || {};
   this.bitwise = (bitwise === true);
   this.configure();
@@ -108,7 +108,7 @@ var Logger = function(conf, bitwise, parent) {
   this.initialize(streams);
 }
 
-util.inherits(Logger, events.EventEmitter);
+util.inherits(Logger, EventEmitter);
 
 /**
  *  Configure instance log levels.
@@ -230,9 +230,14 @@ Logger.prototype.convert = function(source) {
   if(!~types.indexOf(source.type)) {
     throw new Error('Unknown stream type \'' + source.type + '\'');
   }
-  if(source.stream && !(source.stream instanceof Writable)
-    && source.stream !== process.stdout
-    && source.stream !== process.stderr) {
+  //if(source.stream && !(source.stream instanceof Writable)
+    //&& source.stream !== process.stdout
+    //&& source.stream !== process.stderr) {
+    //throw new Error('Invalid stream specified');
+  //}
+
+  if(source.stream && !(source.stream instanceof EventEmitter)
+    && typeof source.stream.write !== 'function') {
     throw new Error('Invalid stream specified');
   }
   if((source.stream instanceof RingBuffer)) {
