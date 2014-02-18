@@ -95,7 +95,7 @@ log.fatal()          // FATAL: 60 | BW_FATAL: 32
 
 In normal mode the additional constant `NONE` (70) may be used to disable logging. In bitwise mode you may also use `BW_NONE` (0) and `BW_ALL` (63), `BW_ALL` is particularly useful for `XOR` operations, see [constants](#constants).
 
-The API for getting and setting log levels is consistent with [bunyan][bunyan]:
+The API for getting and setting log levels is identical to [bunyan][bunyan]:
 
 ```javascript
 log.info()               // true if any stream is enabled for the info level
