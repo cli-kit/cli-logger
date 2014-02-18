@@ -101,12 +101,12 @@ The API for getting and setting log levels is identical to [bunyan][bunyan]:
 log.info()                    // true if any stream is enabled for the info level
 log.level()                   // get a level integer (lowest level of all streams)
 log.level(log.INFO)           // sets all streams to the INFO level
-log.level('info')             // sets all streams to the INFO level (normal only)
+log.level('info')             // sets all streams to the INFO level (normal)
 log.levels()                  // gets an array of the levels of all streams
 log.levels(0)                 // get level of stream at index zero
 log.levels('foo')             // get level of the stream named 'foo'
 log.levels(0, log.INFO)       // set level of stream at index zero to INFO
-log.levels(0, 'info')         // set level of stream at index zero to INFO (normal only)
+log.levels(0, 'info')         // set level of stream at index zero to INFO (normal)
 log.levels(0, log.INFO)       // set level of stream at index zero to INFO
 log.levels('foo', log.WARN)   // set level of stream named 'foo' to WARN
 ```
