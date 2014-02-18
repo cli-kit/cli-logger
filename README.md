@@ -345,9 +345,33 @@ The `encoding` and `mode` options supported by `fs.createWriteStream` are also r
 
 The `Logger` implementation dispatches the following events:
 
-* `error`: Emitted if there is an error on an underlying stream, it is recommended you listen for this event.
-* `write`: If a listener exists for this event it is invoked with all the log record information and no data is written by the logger to the underlying streams.
-* `log`: Emitted when a log record has been written to stream(s), if listeners exist for the `write` event, this event will not fire.
+### error
+
+Emitted if there is an error on an underlying stream, it is recommended you listen for this event.
+
+```javascript
+function error(err, stream)
+```
+
+### write
+
+If a listener exists for this event it is invoked with all the log record information and no data is written by the logger to the underlying stream(s).
+
+```javascript
+function write(record, stream, msg, parameters)
+```
+
+Note that `record.msg` contains the message with parameters substituted, whilst the `msg` and `parameters` are the raw message and replacement parameters should you need them. 
+
+### log
+
+Emitted when a log record has been written to stream(s), if listeners exist for the `write` event, this event will not fire.
+
+```javascript
+function log(record, level, msg, parameters)
+```
+
+Note that if a log record is written to multiple streams this event will only be emitted once for the log record.
 
 ## License
 
