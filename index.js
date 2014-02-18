@@ -40,6 +40,8 @@ var defaults = {
   name: basename(process.argv[1]),
   json: false,
   src: false,
+  hostname: null,
+  pid: null,
   stack: false,
   console: false,
   serializers: null,

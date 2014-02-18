@@ -111,9 +111,11 @@ log.levels('foo', WARN)  // set level of stream named 'foo' to WARN
 ## Configuration
 
 * `console`: A boolean indicating that console methods should be used when writing log records, this enables the [ttycolor][ttycolor] integration, default is `false`, see [console](#console).
+* `hostname`: Allows overriding the `hostname` field added to all log records, default is `null` but is automatically set to `os.hostname()` if not specified, see [record](#record).
 * `json`: Print log records as newline delimited JSON, default is `false`, see [json](#json).
 * `level`: A default log level to use when a stream does not explicitly specify a log level, default is `INFO`, see [level](#level).
 * `name`: The name of the logger, default is `basename(process.argv[1])`, see [name](#name).
+* `pid`: Allows overriding the `pid` field added to all log records, default is `null` but is automatically set to `process.pid` if not specified, see [record](#record).
 * `prefix`: A function used to prepend a prefix to log messages, default is `null`, see [prefix](#prefix).
 * `serializers`: Map of log record property names to serialization functions,
   default is `null`, see [serializers](#serializers).
@@ -421,6 +423,35 @@ Note that no prefix is necessary when accessing constants on the instance.
 
 The rule of thumb is that if you are setting log levels in the configuration then use the prefixed constants for bitwise mode. If you are setting log levels after instantiation then you can use the constants exposed by the `Logger` instance without a prefix regardless of mode.
 
+## Record
+
+Log record fields are consistent with [bunyan][bunyan], a log record in normal mode may look like:
+
+```json
+{
+  "time": "2014-02-18T06:42:41.868Z",
+  "pid": 31641,
+  "hostname": "pearl.local",
+  "name": "record",
+  "msg": "mock info message",
+  "level": 30,
+  "v": 0
+}
+```
+
+See the [record][record] example program.
+
+### Fields
+
+* `v`: Required integer, cannot be overriden. Module major version extracted from `package.json`.
+* `level`: Required integer, cannot be overriden. Determined automatically by the log method.
+* `name`: Required string, cannot be overriden. Provided at creation or `basename(process.argv[1])`.
+* `hostname`: Required string, provided at creation or `os.hostname()`.
+* `pid`: Required integer, provided at creation or `process.pid`.
+* `time`: Required string, can be overriden. Default is `new Date().toISOString()`.
+* `msg`: Required string. Must be supplied when calling a log method.
+* `src`: Optional object, contains log caller information. Automatically added if the `src` configuration property has been set.
+
 ## License
 
 Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license](/LICENSE) if you feel inclined.
@@ -433,6 +464,7 @@ Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license
 
 [color]: https://github.com/freeformsystems/cli-logger/tree/master/bin/color
 [prefix]: https://github.com/freeformsystems/cli-logger/tree/master/bin/prefix
+[record]: https://github.com/freeformsystems/cli-logger/tree/master/bin/record
 [ringbuffer]: https://github.com/freeformsystems/cli-logger/tree/master/bin/ringbuffer
 [serialize]: https://github.com/freeformsystems/cli-logger/tree/master/bin/serialize
 [source]: https://github.com/freeformsystems/cli-logger/tree/master/bin/source

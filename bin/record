@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+/**
+ *  Example used to print the default log record fields.
+ *
+ *  ./bin/record
+ */
+var logger = require('..');
+var log = logger();
+log.on('write', function(record, stream, msg, parameters) {
+  console.log(JSON.stringify(record, undefined, 2));
+})
+log.info('mock %s message', 'info');
