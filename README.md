@@ -297,6 +297,7 @@ The following types of streams are supported:
 * `stream`: An existing stream such as `process.stdout`, `process.stderr` or some other writable stream. 
 * `file`: Creates a writable stream from a string file system path.
 * `raw`: Forces the raw log record to always be passed to the `write()` method of the stream.
+* `console`: A stream that writes log messages to a `console` method, streams of this type are passed the raw log record which is decorated with the additional properties `message` (the raw message string) and `parameters` (message replacement parameters).
 
 #### Stream
 
@@ -358,6 +359,34 @@ The `encoding` and `mode` options supported by `fs.createWriteStream` are also r
 #### Raw
 
 The raw stream type is useful when you want to ensure that the stream implementation is passed the raw log record,  this type is implied when using a [ring buffer](#ring-buffer).
+
+#### Console
+
+Use the `console` stream type when you need access to the raw message and message replacement parameters. This stream type is implied when the `console` configuration property is set, alternatively you can use this to redirect some messages to `console` methods and possibly others to a log file as JSON records, for example:
+
+```javascript
+var logger = require('cli-logger');
+var conf = {
+  streams: [
+    {
+      stream: new logger.ConsoleStream(),
+      level: log.BW_TRACE|log.BW_DEBUG|log.BW_INFO
+    },
+    {
+      path: 'log/json.log',
+      json: true,
+      level: log.BW_ALL^log.BW_TRACE^log.BW_DEBUG^log.BW_INFO
+    }
+  ]
+}
+var log = logger(conf, true);
+// print to stdout using `console.info`
+log.info('mock %s message', 'info');
+// print to log file as a json record
+log.warn('mock %s message', 'warn');
+```
+
+See the [json][json] example program.
 
 ## Ring Buffer
 
@@ -491,6 +520,7 @@ Everything is [MIT](http://en.wikipedia.org/wiki/MIT_License). Read the [license
 [test suite]: https://github.com/freeformsystems/cli-logger/tree/master/test/unit
 
 [color]: https://github.com/freeformsystems/cli-logger/tree/master/bin/color
+[json]: https://github.com/freeformsystems/cli-logger/tree/master/bin/json
 [prefix]: https://github.com/freeformsystems/cli-logger/tree/master/bin/prefix
 [record]: https://github.com/freeformsystems/cli-logger/tree/master/bin/record
 [ringbuffer]: https://github.com/freeformsystems/cli-logger/tree/master/bin/ringbuffer

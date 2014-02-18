@@ -12,6 +12,7 @@ var major = parseInt(pkg.version.split('.')[0]), z;
 var RAW = 'raw';
 var STREAM = 'stream';
 var FILE = 'file';
+var CONSOLE = 'console';
 
 var LEVELS = {
   trace: 10,
@@ -35,7 +36,7 @@ var BITWISE = {
 }
 
 var keys = Object.keys(LEVELS); keys.pop();
-var types = [RAW, STREAM, FILE];
+var types = [RAW, STREAM, FILE, CONSOLE];
 var defaults = {
   name: basename(process.argv[1]),
   json: false,
@@ -65,13 +66,12 @@ var circular = require('./lib/circular');
 var Logger = function(conf, bitwise, parent) {
   EventEmitter.call(this);
   conf = conf || {};
+  this.keys = keys;
   this.bitwise = (bitwise === true);
   this.configure();
   var cstreams = parent && conf.streams;
   var streams = conf.streams, stream = conf.stream;
-  streams = streams || {
-    stream: stream || process.stdout
-  }
+  streams = streams || this.getDefaultStream(conf);
   delete conf.streams;
   delete conf.stream;
   var target = parent ? merge(parent.conf, {}) : merge(defaults, {});
@@ -84,23 +84,6 @@ var Logger = function(conf, bitwise, parent) {
   if(stream) conf.stream = stream;
   this.pid = this.conf.pid || process.pid;
   this.hostname = this.conf.hostname || os.hostname();
-  if(this.conf.console) {
-    var writers = this.conf.writers || {};
-    if(typeof writers === 'function') {
-      var writer = writers;
-      writers = {};
-      keys.forEach(function(method) {
-        writers[method] = writer;
-      })
-    }
-    this.writers = {};
-    this.writers[this.TRACE] = writers.trace || console.log;
-    this.writers[this.DEBUG] = writers.debug || console.log;
-    this.writers[this.INFO] = writers.info || console.info;
-    this.writers[this.WARN] = writers.warn || console.warn;
-    this.writers[this.ERROR] = writers.error || console.error;
-    this.writers[this.FATAL] = writers.fatal || console.error;
-  }
   this.fields = {};
   this.streams = [];
   if(parent && cstreams) {
@@ -111,6 +94,21 @@ var Logger = function(conf, bitwise, parent) {
 }
 
 util.inherits(Logger, EventEmitter);
+
+/**
+ *  Retrieve the default stream when no streams have been configured.
+ *
+ *  @param conf The configuration object.
+ */
+Logger.prototype.getDefaultStream = function(conf) {
+  var stream = conf.stream;
+  if(conf.console && !(stream instanceof ConsoleStream)) {
+    stream = new ConsoleStream({writers: conf.writers});
+  }
+  return {
+    stream: stream || process.stdout
+  }
+}
 
 /**
  *  Configure instance log levels.
@@ -244,6 +242,11 @@ Logger.prototype.convert = function(source) {
   }
   if((source.stream instanceof RingBuffer)) {
     source.type = RAW;
+  }else if((source.stream instanceof ConsoleStream)) {
+    source.type = CONSOLE;
+  }
+  if(source.stream && typeof source.stream.logger === 'function') {
+    source.stream.logger(this);
   }
   this.append(source);
 }
@@ -400,18 +403,30 @@ Logger.prototype.write = function(level, record, parameters) {
         this.emit('write', record, target.stream, msg, parameters);
       }else{
         event = record;
-        if(this.conf.console && this.writers[level]) {
-          this.writers[level].apply(
-            console, [record.msg].concat(parameters));
+        if(target.type === CONSOLE) {
+          record.message = msg;
+          record.parameters = parameters;
+          target.stream.write(record);
+        }else if(typeof json === 'string') {
+          target.stream.write(json + '\n');
+        }else if(target.type === RAW){
+          target.stream.write(record);
         }else{
-          if(typeof json === 'string') {
-            target.stream.write(json + '\n');
-          }else if(target.type === RAW){
-            target.stream.write(record);
-          }else{
-            target.stream.write(record.msg + '\n');
-          }
+          target.stream.write(record.msg + '\n');
         }
+
+        //if(this.conf.console && this.writers[level]) {
+          //this.writers[level].apply(
+            //console, [record.msg].concat(parameters));
+        //}else{
+          //if(typeof json === 'string') {
+            //target.stream.write(json + '\n');
+          //}else if(target.type === RAW){
+            //target.stream.write(record);
+          //}else{
+            //target.stream.write(record.msg + '\n');
+          //}
+        //}
       }
     }
   }
@@ -677,6 +692,7 @@ Logger.prototype.fatal = function() {
   return this.log.apply(this, args);
 }
 
+var ConsoleStream = require('./lib/console-stream');
 var RingBuffer = require('./lib/ring-buffer');
 var serializers = require('./lib/serializers');
 
@@ -715,6 +731,7 @@ module.exports.serializers = module.exports.stdSerializers = serializers;
 module.exports.circular = circular;
 module.exports.createLogger = createLogger;
 module.exports.Logger = Logger;
+module.exports.ConsoleStream = ConsoleStream;
 module.exports.RingBuffer = RingBuffer;
 for(z in LEVELS) {
   module.exports[z.toUpperCase()] = LEVELS[z];

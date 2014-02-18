@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+
+/**
+ *  Example for printing some messages to stdout and redirecting
+ *  errors to a file stream with json output enabled.
+ *
+ *  ./bin/json
+ *  ./bin/json && cat log/json.log | ./bunyan
+ */
+require('ttycolor')().defaults();
+var log = require('..');
+var conf = {
+  streams: [
+    {
+      stream: new log.ConsoleStream(),
+      level: log.BW_TRACE|log.BW_DEBUG|log.BW_INFO
+    },
+    {
+      path: 'log/json.log',
+      json: true,
+      level: log.BW_ALL^log.BW_TRACE^log.BW_DEBUG^log.BW_INFO
+    }
+  ]
+}
+var logger = log(conf, true);
+log.keys.forEach(function(key) {
+  logger[key]('mock %s message', key);
+})
