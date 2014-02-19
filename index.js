@@ -3,7 +3,7 @@ var fs = require('fs');
 var os = require('os');
 var path = require('path'), basename = path.basename;
 var util = require('util');
-var Writable = require('stream').Writable;
+var circular = require('circular');
 var merge = require('cli-util').merge;
 
 var pkg = require(path.join(__dirname, 'package.json'));
@@ -52,8 +52,6 @@ var defaults = {
   stream: null,
   streams: null
 }
-
-var circular = require('./lib/circular');
 
 /**
  *  Create a Logger instance.
