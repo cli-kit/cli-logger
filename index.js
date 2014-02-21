@@ -374,12 +374,14 @@ Logger.prototype.serialize = function(k, v) {
  */
 Logger.prototype.write = function(level, record, parameters) {
   var i, target, listeners = this.listeners('write'), json, params, event;
-  var msg = '' + record.msg;
+  var msg = '' + record.msg, prefix;
   params = parameters.slice(0);
   params.unshift(record.msg);
   record.msg = util.format.apply(util, params);
   if(typeof this.conf.prefix === 'function') {
-    record.msg = this.conf.prefix.apply(this, [record]) + record.msg;
+    prefix = this.conf.prefix.apply(this, [record]);
+    record.msg = prefix + record.msg;
+    msg = prefix + msg;
   }
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
