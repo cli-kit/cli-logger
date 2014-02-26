@@ -378,13 +378,18 @@ Logger.prototype.write = function(level, record, parameters) {
   params = parameters.slice(0);
   params.unshift(record.msg);
   record.msg = util.format.apply(util, params);
-  if(typeof this.conf.prefix === 'function') {
-    prefix = this.conf.prefix.apply(this, [record]);
-    record.msg = prefix + record.msg;
-    msg = prefix + msg;
-  }
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
+    if(typeof this.conf.prefix === 'function' && !prefix) {
+      prefix = this.conf.prefix.apply(this, [record]);
+      if(target.type == CONSOLE) {
+        msg = '%s ' + msg;
+        parameters.unshift(prefix);
+      }else{
+        record.msg = prefix + record.msg;
+        msg = prefix + msg;
+      }
+    }
     json = (target.json === true) || this.conf.json;
     if(json && !listeners.length && (target.type !== RAW)) {
       if(this.bitwise) record.level = this.translate(record.level);
