@@ -20,7 +20,7 @@
     "logger"
   ],
   "dependencies": {
-    "ttycolor": "~0.8.4",
+    "ttycolor": "~0.8.6",
     "cli-util": "~1.1.6",
     "circular": "~1.0.2"
   },
