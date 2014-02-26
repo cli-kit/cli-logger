@@ -109,6 +109,18 @@ Logger.prototype.getDefaultStream = function(conf) {
   }
 }
 
+Logger.prototype.useConsoleStream = function() {
+  var stream = new ConsoleStream({writers: this.conf.writers});
+  stream.logger(this);
+  this.streams[0].stream = stream;
+  this.streams[0].type = CONSOLE;
+}
+
+Logger.prototype.isDefault = function() {
+  return this.streams.length === 1
+    && this.streams[0].stream === process.stdout;
+}
+
 /**
  *  Configure instance log levels.
  *
