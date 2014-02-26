@@ -40,6 +40,7 @@ var types = [RAW, STREAM, FILE, CONSOLE];
 var defaults = {
   name: basename(process.argv[1]),
   json: false,
+  trace: true,
   src: false,
   hostname: null,
   pid: null,
@@ -429,7 +430,14 @@ Logger.prototype.write = function(level, record, parameters) {
 Logger.prototype.log = function(level, message) {
   if(!level) return false;
   if(level && !message) return this.enabled(level);
-  var info = this.getLogRecord.apply(this, arguments);
+  var args = [].slice.call(arguments, 0);
+  if((args[1] instanceof Error)
+    && !this.conf.json && this.conf.trace
+    && (args[1].stack)) {
+    args[1] = arguments[1].stack;
+    args = args.slice(0, 2);
+  }
+  var info = this.getLogRecord.apply(this, args);
   return this.write(level, info.record, info.parameters);
 }
 
