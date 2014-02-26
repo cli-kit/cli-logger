@@ -382,10 +382,7 @@ Logger.prototype.write = function(level, record, parameters) {
     target = this.streams[i];
     if(typeof this.conf.prefix === 'function' && !prefix) {
       prefix = this.conf.prefix.apply(this, [record]);
-      if(target.type == CONSOLE) {
-        msg = '%s ' + msg;
-        parameters.unshift(prefix);
-      }else{
+      if(target.type !== CONSOLE) {
         record.msg = prefix + record.msg;
         msg = prefix + msg;
       }
@@ -403,7 +400,7 @@ Logger.prototype.write = function(level, record, parameters) {
         if(target.type === CONSOLE) {
           record.message = msg;
           record.parameters = parameters;
-          target.stream.write(record);
+          target.stream.write(record, prefix);
         }else if(typeof json === 'string') {
           target.stream.write(json + '\n');
         }else if(target.type === RAW){
