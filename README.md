@@ -157,7 +157,7 @@ You may customize the mapping between log methods and `console` methods by eithe
 var conf = {console: true, writers: console.error};
 ```
 
-Or by mapping inidividual log method names, for example if you would prefer `trace` and `debug` messages to be printed to `stderr`:
+Or by mapping individual log method names, for example if you would prefer `trace` and `debug` messages to be printed to `stderr`:
 
 ```javascript
 var conf = {
