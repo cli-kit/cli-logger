@@ -697,15 +697,6 @@ var ConsoleStream = require('./lib/console-stream');
 var RingBuffer = require('./lib/ring-buffer');
 var serializers = require('./lib/serializers');
 
-var NoopLogger = function() {
-  Logger.apply(this, arguments);
-}
-
-util.inherits(NoopLogger, Logger);
-keys.forEach(function(key) {
-  NoopLogger.prototype[key] = function(){}
-})
-
 /**
  *  Create a Logger and set json configuration
  *  to true if it has not been defined.
@@ -741,7 +732,6 @@ module.exports.serializers = module.exports.stdSerializers = serializers;
 module.exports.circular = circular;
 module.exports.createLogger = createLogger;
 module.exports.Logger = Logger;
-module.exports.NoopLogger = NoopLogger;
 module.exports.ConsoleStream = ConsoleStream;
 module.exports.RingBuffer = RingBuffer;
 for(z in LEVELS) {
@@ -755,4 +745,3 @@ module.exports.STREAM = STREAM;
 module.exports.FILE = FILE;
 module.exports.CONSOLE = CONSOLE;
 module.exports.LOG_VERSION = major;
-module.exports.noop = new NoopLogger;
