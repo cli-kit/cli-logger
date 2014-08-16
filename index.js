@@ -209,6 +209,9 @@ Logger.prototype.append = function(source) {
   }
   if(typeof json === 'boolean') data.json = json;
   this.streams.push(data);
+  if(process.env.NODE_ENV === 'test') {
+    stream.setMaxListeners(1024);
+  }
   stream.on('error', function(e) {
     scope.emit('error', e, stream);
   })
