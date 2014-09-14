@@ -38,7 +38,7 @@
   ],
   "scripts": {
     "clean": "rm -f log/*.log",
-    "test": "istanbul cover _mocha -- -u bdd --recursive --bail -A test/unit/"
+    "test": "istanbul cover _mocha -- -u bdd --recursive --bail --reporter list -A test/unit/"
   },
   "config": {}
 }
