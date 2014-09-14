@@ -721,8 +721,8 @@ function createLogger(conf, bitwise) {
  *  @param bitwise A boolean indicating that log levels
  *  should use bitwise operators.
  */
-module.exports = function(conf, bitwise) {
-  return new Logger(conf, bitwise);
+module.exports = function(conf, bitwise, parent) {
+  return new Logger(conf, bitwise, parent);
 }
 
 module.exports.levels = LEVELS;
