@@ -385,10 +385,13 @@ Logger.prototype.serialize = function(k, v) {
  *  @param level The log level.
  *  @param record The log record.
  *  @param parameters Message replacement parameters.
+ *  @param force Force write to the stream even if the level would
+ *  disallow it.
  */
-Logger.prototype.write = function(level, record, parameters) {
+Logger.prototype.write = function(level, record, parameters, force) {
   var i, target, listeners = this.listeners('write'), json, params, event;
   var msg = '' + record.msg, prefix;
+  level = level || record.level;
   params = parameters.slice(0);
   params.unshift(record.msg);
   record.msg = util.format.apply(util, params);
@@ -406,7 +409,7 @@ Logger.prototype.write = function(level, record, parameters) {
       if(this.bitwise) record.level = this.translate(record.level);
       json = JSON.stringify(record, circular());
     }
-    if(this.enabled(level, target.level)) {
+    if(force || this.enabled(level, target.level)) {
       if(listeners.length) {
         this.emit('write', record, target.stream, msg, parameters);
       }else{
@@ -452,6 +455,23 @@ Logger.prototype.log = function(level, message) {
   }
   var info = this.getLogRecord.apply(this, args);
   return this.write(level, info.record, info.parameters);
+}
+
+/**
+ *  Force print a message at the info level.
+ *
+ *  @param message The log message.
+ *  @param ... The message replacement parameters.
+ */
+Logger.prototype.print = function() {
+  var level = this._levels.info;
+  var args = [].slice.call(arguments, 0);
+  if(typeof args[0] === 'object' && args[0].level) {
+    level = args[0].level;
+  }
+  args.unshift(level);
+  var info = this.getLogRecord.apply(this, args);
+  return this.write(level, info.record, info.parameters, true);
 }
 
 /**
