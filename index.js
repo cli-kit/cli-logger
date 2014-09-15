@@ -344,7 +344,7 @@ Logger.prototype.getLogRecord = function(level, message) {
   }
   if(err) {
     message = err.message || arguments[2];
-    parameters = err.parameters || parameters;
+    parameters = (err.parameters || parameters || []).slice(0);
   }
   record.time = new Date().toISOString();
   for(z in this.fields) {
@@ -423,6 +423,7 @@ Logger.prototype.write = function(level, record, parameters, force) {
           record,
           target.type === RAW
             ? false : target.type === CONSOLE || target.stream.isTTY]);
+
       if(target.type !== CONSOLE) {
         record.msg = prefix + record.msg;
         msg = prefix + msg;
