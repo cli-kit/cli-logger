@@ -395,6 +395,7 @@ Logger.prototype.write = function(level, record, parameters, force) {
   params = parameters.slice(0);
   params.unshift(record.msg);
   record.msg = util.format.apply(util, params);
+  //console.log('writing %j', record);
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
     if(typeof this.conf.prefix === 'function' && !prefix) {
