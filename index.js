@@ -318,16 +318,33 @@ Logger.prototype.translate = function(level) {
  */
 Logger.prototype.getLogRecord = function(level, message) {
   var parameters = [].slice.call(arguments, 2), args, z;
-  var err = (message instanceof Error) ? message : null;
+  var record = {};
+  var err = (message instanceof Error) ? message : null
+    , clierr = err && typeof err.toStackArray === 'function'
+    , e, k;
+
+  if(err) {
+    e = {};
+    for(k in err) {
+      e[k] = err[k];
+    }
+    //console.log('is cli err %s', clierr);
+    // array of stack trace lines is preferable
+    if(err.stack) {
+      e.stack = clierr ? err.toStackArray() : err.stack.split('\n');
+    }
+    record.err = e;
+  }
+
   var obj = (!err && message && typeof(message) == 'object') ? message : null;
   if(err || obj) {
     message = arguments[2] || '';
     parameters = [].slice.call(arguments, 3);
   }
-  if(err && arguments.length == 2) {
-    message = err.message;
+  if(err) {
+    message = err.message || arguments[2];
+    parameters = err.parameters || parameters;
   }
-  var record = {};
   record.time = new Date().toISOString();
   for(z in this.fields) {
     record[z] = this.serialize(z, this.fields[z]);
@@ -345,13 +362,14 @@ Logger.prototype.getLogRecord = function(level, message) {
   record.name = this.conf.name;
   record.msg = message;
   record.level = level;
-  if(err) {
+  if(err && !clierr) {
     record.err = serializers.err.call(this, err);
   }
   if(this.conf.src) {
     record.src = this.getCallerInfo();
   }
   record.v = major;
+  //console.dir(record);
   return {record: record, parameters: parameters};
 }
 
@@ -452,13 +470,8 @@ Logger.prototype.log = function(level, message) {
   if(!level) return false;
   if(level && !message) return this.enabled(level);
   var args = [].slice.call(arguments, 0);
-  if((args[1] instanceof Error)
-    && !this.conf.json && this.conf.trace
-    && (args[1].stack)) {
-    args[1] = arguments[1].stack;
-    args = args.slice(0, 2);
-  }
   var info = this.getLogRecord.apply(this, args);
+  //console.dir(info);
   return this.write(level, info.record, info.parameters);
 }
 
