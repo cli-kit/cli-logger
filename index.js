@@ -326,6 +326,7 @@ Logger.prototype.getLogRecord = function(level, message) {
   if(err) {
     e = {};
     for(k in err) {
+      if(typeof err[k] === 'function' || /^_/.test(k)) continue;
       e[k] = err[k];
     }
     //console.log('is cli err %s', clierr);
@@ -436,6 +437,9 @@ Logger.prototype.write = function(level, record, parameters, force) {
       if(listeners.length) {
         this.emit('write', record, target.stream, msg, parameters);
       }else{
+        target.isConsole = (target.type === CONSOLE);
+        target.isRaw = (target.type === RAW);
+        this.emit('record', level, record, target, msg, parameters);
         event = record;
         if(target.type === CONSOLE) {
           record.message = msg;
@@ -448,6 +452,7 @@ Logger.prototype.write = function(level, record, parameters, force) {
         }else{
           target.stream.write(record.msg + '\n');
         }
+        this.emit('flush', level, record, target, msg, parameters);
       }
     }
   }
