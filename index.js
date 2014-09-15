@@ -398,7 +398,11 @@ Logger.prototype.write = function(level, record, parameters, force) {
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
     if(typeof this.conf.prefix === 'function' && !prefix) {
-      prefix = this.conf.prefix.apply(this, [record]);
+      prefix = this.conf.prefix.apply(
+        this, [
+          record,
+          target.type === RAW
+            ? false : target.type === CONSOLE || target.stream.isTTY]);
       if(target.type !== CONSOLE) {
         record.msg = prefix + record.msg;
         msg = prefix + msg;
