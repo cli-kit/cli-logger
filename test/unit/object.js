@@ -6,7 +6,7 @@ describe('cli-logger:', function() {
     var name = 'mock-object-logger';
     var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
     var log = logger(conf);
-    log.on('write', function(record, stream) {
+    log.on('write', function(record) {
       expect(record.req).to.be.an('object');
       expect(record.req.path).to.eql('/');
       done();
@@ -18,7 +18,7 @@ describe('cli-logger:', function() {
     var name = 'mock-object-logger';
     var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
     var log = logger(conf);
-    log.on('write', function(record, stream) {
+    log.on('write', function(record) {
       expect(record.msg).to.eql(msg);
       expect(record.req).to.be.an('object');
       expect(record.req.path).to.eql('/');
@@ -31,12 +31,25 @@ describe('cli-logger:', function() {
     var name = 'mock-object-logger';
     var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
     var log = logger(conf);
-    log.on('write', function(record, stream) {
+    log.on('write', function(record) {
       expect(record.msg).to.eql(expected);
       expect(record.req).to.be.an('object');
       expect(record.req.path).to.eql('/');
       done();
     })
     log.info({req: {path: '/'}}, 'mock %s message', 'info');
+  });
+  it('should stringify an object if no message provided', function (done) {
+    var expected = '{"req":{"path":"/"}}';
+    var name = 'mock-object-logger';
+    var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
+    var log = logger(conf);
+    log.on('write', function(record) {
+      expect(record.msg).to.eql(expected);
+      expect(record.req).to.be.an('object');
+      expect(record.req.path).to.eql('/');
+      done();
+    })
+    log.info({req: {path: '/'}});
   });
 })

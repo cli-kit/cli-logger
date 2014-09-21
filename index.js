@@ -317,7 +317,7 @@ Logger.prototype.translate = function(level) {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.getLogRecord = function(level, message) {
-  var parameters = [].slice.call(arguments, 2), args, z;
+  var parameters = [].slice.call(arguments, 2), z;
   var err = (message instanceof Error) ? message : null;
   var obj = (!err && message && typeof(message) == 'object') ? message : null;
   if(err || obj) {
@@ -337,7 +337,7 @@ Logger.prototype.getLogRecord = function(level, message) {
       record[z] = this.serialize(z, obj[z]);
     }
     if(arguments.length == 2) {
-      message = '';
+      message = JSON.stringify(obj, circular());
     }
   }
   record.pid = this.pid;
