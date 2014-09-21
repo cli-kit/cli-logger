@@ -343,7 +343,7 @@ Logger.prototype.getLogRecord = function(level, message) {
     parameters = [].slice.call(arguments, 3);
   }
   if(err) {
-    message = err.message || arguments[2];
+    message = arguments[2] || err.message;
     parameters = (err.parameters || parameters || []).slice(0);
   }
   record.time = new Date().toISOString();
