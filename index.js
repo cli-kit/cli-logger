@@ -317,11 +317,11 @@ Logger.prototype.translate = function(level) {
  *  @param ... The message replacement parameters.
  */
 Logger.prototype.getLogRecord = function(level, message) {
-  var parameters = [].slice.call(arguments, 2), args, z;
-  var record = {};
-  var err = (message instanceof Error) ? message : null
-    , clierr = err && typeof err.toStackArray === 'function'
-    , e, k;
+  var parameters = [].slice.call(arguments, 2)
+    , z, e, k
+    , record = {}
+    , err = (message instanceof Error) ? message : null
+    , clierr = err && typeof err.toStackArray === 'function';
 
   if(err) {
     e = {};
@@ -355,7 +355,7 @@ Logger.prototype.getLogRecord = function(level, message) {
       record[z] = this.serialize(z, obj[z]);
     }
     if(arguments.length == 2) {
-      message = '';
+      message = !this.conf.json ? JSON.stringify(obj, circular()) : '';
     }
   }
   record.pid = this.pid;

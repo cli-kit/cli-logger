@@ -39,4 +39,36 @@ describe('cli-logger:', function() {
     })
     log.info({req: {path: '/'}}, 'mock %s message', 'info');
   });
+
+  it('should stringify an object if no message provided (json false)',
+    function (done) {
+      var expected = '{"req":{"path":"/"}}';
+      var name = 'mock-object-logger';
+      var conf = {name: name, json: false, streams: [{path: 'log/mock-write.log'}]};
+      var log = logger(conf);
+      log.on('write', function(record, stream) {
+        expect(record.msg).to.eql(expected);
+        expect(record.req).to.be.an('object');
+        expect(record.req.path).to.eql('/');
+        done();
+      })
+      log.info({req: {path: '/'}});
+    }
+  );
+
+  it('should use the empty string if no message provided (json true)',
+    function (done) {
+      var expected = '';
+      var name = 'mock-object-logger';
+      var conf = {name: name, json: true, streams: [{path: 'log/mock-write.log'}]};
+      var log = logger(conf);
+      log.on('write', function(record, stream) {
+        expect(record.msg).to.eql(expected);
+        expect(record.req).to.be.an('object');
+        expect(record.req.path).to.eql('/');
+        done();
+      })
+      log.info({req: {path: '/'}});
+    }
+  );
 })
