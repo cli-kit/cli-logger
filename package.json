@@ -29,7 +29,7 @@
   "devDependencies": {
     "cli-error": "~0.4.5",
     "bunyan": "~0.22.1",
-    "mocha": "~1.17.0",
+    "mocha": "~1.21.4",
     "chai": "~1.8.1",
     "istanbul": "~0.2.4"
   },
