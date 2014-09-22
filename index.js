@@ -4,7 +4,10 @@ var os = require('os');
 var path = require('path'), basename = path.basename;
 var util = require('util');
 var circular = require('circular');
-var merge = require('cli-util').merge;
+var utils = require('cli-util');
+var merge = utils.merge;
+var ucfirst = utils.ucfirst;
+var pedantic = utils.pedantic;
 
 var pkg = require(path.join(__dirname, 'package.json'));
 var major = parseInt(pkg.version.split('.')[0]), z;
@@ -51,7 +54,11 @@ var defaults = {
   writers: null,
   level: null,
   stream: null,
-  streams: null
+  streams: null,
+  normalize: false,
+  pedantic: false,
+  capitalize: false,
+  formatter: null
 }
 
 /**
@@ -409,11 +416,17 @@ Logger.prototype.serialize = function(k, v) {
  */
 Logger.prototype.write = function(level, record, parameters, force) {
   var i, target, listeners = this.listeners('write'), json, params, event;
-  var msg = '' + record.msg, prefix;
+  var msg = '' + record.msg, prefix, conf = this.conf;
+  var formatter = conf.formatter, pedantic = conf.pedantic, normalize = conf.normalize,
+    capitalize = conf.capitalize;
   level = level || record.level;
   params = parameters.slice(0);
   params.unshift(record.msg);
   record.msg = util.format.apply(util, params);
+  // if we have not just stringified an object or array, try to format the string.
+  if (!/^[{\[].*[}\]]$/.test(record.msg)) {
+    record.msg = this._formatMessage(record.msg);
+  }
   //console.log('writing %j', record);
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
@@ -462,6 +475,36 @@ Logger.prototype.write = function(level, record, parameters, force) {
   }
   return (listeners.length === 0 && event !== undefined);
 }
+
+/**
+ * Potentially runs one or more of `utils.pedantic()` or `utils.ucfirst()` upon a log message.
+ * @api private
+ * @param {string} message Log message to reformat
+ * @returns {string}
+ */
+Logger.prototype._formatMessage = function _formatMessage(message) {
+  var conf = this.conf,
+    formatter = conf.formatter;
+  // if option "normalize" is true, the string "like this" should look "Like this."
+  // if set, it will override options "pedantic" and "ucfirst".
+  if (conf.normalize) {
+    message = ucfirst(pedantic(message));
+  }
+  else {
+    // if option "pedantic" is truthy, end the message with a period, or a user-defined string.
+    if (conf.pedantic) {
+      message = pedantic(message, typeof conf.pedantic === 'string' && conf.pedantic);
+    }
+    // if option "capitalize" is truthy, capitalize the first letter of the message.
+    if (conf.capitalize) {
+      message = ucfirst(message);
+    }
+  }
+  if (formatter && typeof formatter === 'function') {
+    message = formatter(message);
+  }
+  return message;
+};
 
 /**
  *  Log a message.
