@@ -129,6 +129,10 @@ log.levels('foo', log.WARN)   // set level of stream named 'foo' to WARN
 * `writers`: Map of log level string names to console functions, default is
   `null`. Use this to customize the functions used when `console` is `true`,
   see [writers](#writers).
+* `pedantic`: A boolean or string which indicates messages should be reformatted to end with a period.  If a string, the string is used instead of a period.
+* `capitalize`: A boolean which indicates all messages should be reformatted to begin with an uppercase letter.
+* `normalize`: A shortcut for `pedantic: true` and `capitalize: true`.
+* `formatter`: A custom function which accepts a string and returns a string.  Applied to all messages after parameter interpolation.
 
 If you specify any unknown properties in the configuration then these are considered *persistent fields* and are added to every log record. This is a convenient way to add labels for sub-components to log records.
 
