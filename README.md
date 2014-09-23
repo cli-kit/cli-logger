@@ -129,6 +129,7 @@ log.levels('foo', log.WARN)   // set level of stream named 'foo' to WARN
 * `writers`: Map of log level string names to console functions, default is
   `null`. Use this to customize the functions used when `console` is `true`,
   see [writers](#writers).
+* `formatter`: A formatter function or string formatter name. Supported names are `pedantic`, `capitalize` and `normalize`. Signature is `function(record, parameters, format)`; `record` is the log record about to be written, `parameters` is the message replacement parameters and `format` is the default formatter function bound to the logger instance. Formatter functions are invoked in the scope of the logger.
 
 If you specify any unknown properties in the configuration then these are considered *persistent fields* and are added to every log record. This is a convenient way to add labels for sub-components to log records.
 
