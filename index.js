@@ -1,10 +1,13 @@
-var EventEmitter = require('events').EventEmitter;
-var fs = require('fs');
-var os = require('os');
-var path = require('path'), basename = path.basename;
-var util = require('util');
-var circular = require('circular');
-var merge = require('cli-util').merge;
+var EventEmitter = require('events').EventEmitter
+  , fs = require('fs')
+  , os = require('os')
+  , path = require('path'), basename = path.basename
+  , util = require('util')
+  , circular = require('circular')
+  , utils = require('cli-util')
+  , pedantic = utils.pedantic
+  , ucfirst = utils.ucfirst
+  , merge = utils.merge;
 
 var pkg = require(path.join(__dirname, 'package.json'));
 var major = parseInt(pkg.version.split('.')[0]), z;
@@ -33,6 +36,21 @@ var BITWISE = {
   error: 16,
   fatal: 32,
   all: 63
+}
+
+var formatters = {
+  pedantic: function(record, parameters, format) {
+    var message = format(record, parameters);
+    return pedantic(message, this.conf.pedantic || '.');
+  },
+  normalize: function(record, parameters, format) {
+    var message = format(record, parameters);
+    return ucfirst(pedantic(message, this.conf.pedantic || '.'));
+  },
+  capitalize: function(record, parameters, format) {
+    var message = format(record, parameters);
+    return ucfirst(message);
+  },
 }
 
 var keys = Object.keys(LEVELS); keys.pop();
@@ -394,6 +412,12 @@ Logger.prototype.serialize = function(k, v) {
   return serializer.apply(this, [v]);
 }
 
+Logger.prototype.format = function(record, parameters) {
+  var params = parameters.slice(0);
+  params.unshift(record.msg);
+  return util.format.apply(util, params);
+}
+
 /**
  *  Write the log record to stream(s) or dispatch
  *  the write event if there are listeners for the write
@@ -409,11 +433,23 @@ Logger.prototype.serialize = function(k, v) {
  */
 Logger.prototype.write = function(level, record, parameters, force) {
   var i, target, listeners = this.listeners('write'), json, params, event;
-  var msg = '' + record.msg, prefix;
+  var msg = '' + record.msg
+    , prefix
+    , conf = this.conf
+    , formatter;
+  parameters = parameters || [];
   level = level || record.level;
   params = parameters.slice(0);
-  params.unshift(record.msg);
-  record.msg = util.format.apply(util, params);
+
+  formatter = typeof conf.formatter === 'function' ? conf.formatter : null;
+  if(!formatter) {
+    formatter = formatter || typeof conf.formatter === 'string'
+      ? formatters[conf.formatter] : null;
+  }
+  formatter = formatter || this.format;
+
+  record.msg = formatter.call(this, record, params, this.format.bind(this));
+
   //console.log('writing %j', record);
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
