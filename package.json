@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "circular": "^1.0.5",
-    "cli-util": "^1.1.19",
+    "cli-util": "^1.1.21",
     "ttycolor": "^0.8.12"
   },
   "devDependencies": {
