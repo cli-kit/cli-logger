@@ -83,6 +83,7 @@ var defaults = {
 var Logger = function(conf, bitwise, parent) {
   EventEmitter.call(this);
   conf = conf || {};
+  constants(this);
   this.keys = keys;
   this.bitwise = (bitwise === true);
   this.configure();
@@ -805,6 +806,15 @@ module.exports = function(conf, bitwise, parent) {
   return new Logger(conf, bitwise, parent);
 }
 
+function constants(target) {
+  for(z in LEVELS) {
+    target[z.toUpperCase()] = LEVELS[z];
+  }
+  for(z in BITWISE) {
+    target['BW_' + z.toUpperCase()] = BITWISE[z];
+  }
+}
+
 module.exports.levels = LEVELS;
 module.exports.bitwise = BITWISE;
 module.exports.types = types;
@@ -815,12 +825,7 @@ module.exports.createLogger = createLogger;
 module.exports.Logger = Logger;
 module.exports.ConsoleStream = ConsoleStream;
 module.exports.RingBuffer = RingBuffer;
-for(z in LEVELS) {
-  module.exports[z.toUpperCase()] = LEVELS[z];
-}
-for(z in BITWISE) {
-  module.exports['BW_' + z.toUpperCase()] = BITWISE[z];
-}
+constants(module.exports);
 module.exports.RAW = RAW;
 module.exports.STREAM = STREAM;
 module.exports.FILE = FILE;
