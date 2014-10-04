@@ -479,12 +479,12 @@ Logger.prototype.write = function(level, record, parameters, force) {
         target.isRaw = (target.type === RAW);
         this.emit('record', level, record, target, msg, parameters);
         event = record;
-        if(target.type === CONSOLE) {
+        if(typeof json === 'string') {
+          target.stream.write(json + '\n');
+        }else if(target.type === CONSOLE) {
           record.message = msg;
           record.parameters = parameters;
           target.stream.write(record, prefix);
-        }else if(typeof json === 'string') {
-          target.stream.write(json + '\n');
         }else if(target.type === RAW){
           target.stream.write(record);
         }else{
