@@ -480,7 +480,7 @@ Logger.prototype.write = function(level, record, parameters, force) {
         this.emit('record', level, record, target, msg, parameters);
         event = record;
         if(typeof json === 'string') {
-          target.stream.write(json + '\n');
+          target.stream.write(json + (target.isConsole ? '' : '\n'), level);
         }else if(target.type === CONSOLE) {
           record.message = msg;
           record.parameters = parameters;
