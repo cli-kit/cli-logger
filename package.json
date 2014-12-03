@@ -23,15 +23,15 @@
   ],
   "dependencies": {
     "circular": "^1.0.5",
-    "cli-util": "^1.1.21"
+    "cli-util": "~1.1.27"
   },
   "devDependencies": {
-    "bunyan": "^1.0.1",
-    "chai": "^1.9.1",
+    "bunyan": "~1.2.3",
+    "chai": "~1.10.0",
     "cli-error": "^0.5.7",
     "istanbul": "^0.3.2",
-    "mocha": "^1.21.4",
-    "ttycolor": "^0.8.12"
+    "mocha": "~2.0.1",
+    "ttycolor": "~0.8.13"
   },
   "engine": [
     "node >= 0.10.21"
