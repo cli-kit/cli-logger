@@ -461,10 +461,14 @@ Logger.prototype.write = function(level, record, parameters, force) {
           target.type === RAW
             ? false : target.type === CONSOLE || target.stream.isTTY]);
 
-      if(target.type !== CONSOLE) {
+      //if(target.type !== CONSOLE) {
+        if(!/\s$/.test(prefix)) {
+          prefix = prefix + ' ';
+        }
         record.msg = prefix + record.msg;
         msg = prefix + msg;
-      }
+        prefix = null;
+      //}
     }
     json = (target.json === true) || this.conf.json;
     if(json && !listeners.length && (target.type !== RAW)) {
