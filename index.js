@@ -451,7 +451,7 @@ Logger.prototype.write = function(level, record, parameters, force) {
 
   record.msg = formatter.call(this, record, params, this.format.bind(this));
 
-  //console.log('writing %j', record);
+  //console.error('writing %j', record);
   for(i = 0;i < this.streams.length;i++) {
     target = this.streams[i];
     if(typeof this.conf.prefix === 'function' && !prefix) {
@@ -459,7 +459,9 @@ Logger.prototype.write = function(level, record, parameters, force) {
         this, [
           record,
           target.type === RAW
-            ? false : target.type === CONSOLE || target.stream.isTTY]);
+            ? false
+            : (target.type === CONSOLE
+               ? target.stream.istty(level) : target.stream.isTTY)]);
 
       if(target.type !== CONSOLE) {
         record.msg = prefix + record.msg;
@@ -727,7 +729,7 @@ Logger.prototype.debug = function() {
  *  @param message The log message.
  *  @param ... The message replacement parameters.
  */
-Logger.prototype.info = function() {
+Logger.prototype.info = function info() {
   var lvl = this._levels.info;
   if(!arguments.length) return this.enabled(lvl);
   var args = [].slice.call(arguments, 0);
