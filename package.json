@@ -31,7 +31,7 @@
     "cli-error": "^0.5.7",
     "istanbul": "~0.3.17",
     "mocha": "~2.2.5",
-    "ttycolor": "~0.8.16"
+    "ttycolor": "~0.8.17"
   },
   "engine": [
     "node >= 0.10.21"
